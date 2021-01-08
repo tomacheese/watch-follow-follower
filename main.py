@@ -2,8 +2,9 @@ import requests
 import json
 import os
 import argparse
+import sys
 
-def getDataIds(endpoint: str, config: dict) -> list[str]:
+def getDataIds(endpoint: str, config: dict):
     print("[INFO] getDataIds({endpoint}, {config})".format(
         endpoint=endpoint, config=config))
     headers = {
@@ -114,6 +115,8 @@ def main(target: str):
     with open("{target}_data.json".format(target=target), "w") as f:
         f.write(json.dumps(ids))
 
+
+os.chdir(sys.path[0])
 
 parser = argparse.ArgumentParser()
 parser.add_argument("target", help="follow or follower")
