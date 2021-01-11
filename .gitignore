@@ -1,3 +1,6 @@
+.idea
+venv
+
 config.json
 follow_data.json
 follower_data.json
