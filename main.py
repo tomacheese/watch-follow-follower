@@ -1,8 +1,10 @@
-import requests
+import argparse
 import json
 import os
-import argparse
 import sys
+
+import requests
+
 
 def getDataIds(endpoint: str, config: dict):
     print("[INFO] getDataIds({endpoint}, {config})".format(
@@ -35,7 +37,7 @@ def getUserData(userid: str, config: dict) -> tuple:
     response = requests.get("https://api.twitter.com/1.1/users/show.json",
                             headers=headers, params=params)
     if response.status_code != 200:
-        print("[Error] " + response.status_code)
+        print("[Error] " + str(response.status_code))
         error_code = response.json()["errors"][0]["code"]
         return None, None, error_code
 
@@ -54,9 +56,11 @@ def sendMessage(channelId: str, message: str, config: dict):
         "content": message
     }
     response = requests.post(
-        "https://discord.com/api/channels/{channelId}/messages".format(channelId=channelId), headers=headers, json=params)
+        "https://discord.com/api/channels/{channelId}/messages".format(channelId=channelId), headers=headers,
+        json=params)
     print("[INFO] response: {code}".format(code=response.status_code))
     print("[INFO] response: {message}".format(message=response.text))
+
 
 def main(target: str):
     print("[INFO] main({target})".format(target=target))
@@ -94,7 +98,8 @@ def main(target: str):
         name, screen_name, code = getUserData(id, config)
         url = "https://twitter.com/intent/user?user_id={userid}".format(userid=id)
 
-        messages.append("`{name}` `@{screen_name}` ({code}) {url}".format(name=name, screen_name=screen_name, code=code, url=url))
+        messages.append(
+            "`{name}` `@{screen_name}` ({code}) {url}".format(name=name, screen_name=screen_name, code=code, url=url))
 
     if len(messages) > 1:
         sendMessage(config["discord_{target}_channel".format(target=target)], "\n".join(messages), config)
