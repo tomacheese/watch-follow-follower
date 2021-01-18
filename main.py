@@ -194,7 +194,7 @@ os.chdir(sys.path[0])
 
 parser = argparse.ArgumentParser()
 parser.add_argument("target", help="Check target", choices=["follow", "follower"])
-parser.add_argument("--init", help="Initialize mode", type=bool, default=False, action="store_true")
+parser.add_argument("--init", help="Initialize mode", default=False, action="store_true")
 args = parser.parse_args()
 
 main(args.target, args.init)
