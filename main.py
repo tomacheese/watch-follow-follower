@@ -144,12 +144,12 @@ def main(target: str, isInit: bool):
     if not os.path.exists("{target}_data.json".format(target=target)) or isInit:
         print("[INFO] Initialize mode")
 
+        with open("{target}_data.json".format(target=target), "w") as f:
+            f.write(json.dumps(ids))
+
         slicedIds = [ids[i:i + 100] for i in range(0, len(ids), 100)]
         for ids in slicedIds:
             saveUsersData(ids, config)
-
-        with open("{target}_data.json".format(target=target), "w") as f:
-            f.write(json.dumps(ids))
 
         print("[INFO] Initialized.")
         return
