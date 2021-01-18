@@ -148,6 +148,9 @@ def main(target: str, isInit: bool):
         for ids in slicedIds:
             saveUsersData(ids, config)
 
+        with open("{target}_data.json".format(target=target), "w") as f:
+            f.write(json.dumps(ids))
+
         print("[INFO] Initialized.")
         return
 
