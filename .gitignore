@@ -2,5 +2,6 @@
 venv
 
 config.json
+userdata.json
 follow_data.json
 follower_data.json

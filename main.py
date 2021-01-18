@@ -39,10 +39,69 @@ def getUserData(userid: str, config: dict) -> tuple:
     if response.status_code != 200:
         print("[Error] " + str(response.status_code))
         error_code = response.json()["errors"][0]["code"]
-        return None, None, error_code
+        if not os.path.exists("userdata.json"):
+            return None, None, error_code
+
+        with open("userdata.json", "r") as f:
+            userdata = json.load(f)
+            if userid in userdata:
+                return userdata[userid]["name"], userdata[userid]["screen_name"], response.status_code
 
     data = response.json()
+
+    if not os.path.exists("userdata.json"):
+        userdata = {}
+    else:
+        with open("userdata.json", "r") as f:
+            userdata = json.load(f)
+
+    userdata[userid] = {
+        "name": data["name"],
+        "screen_name": data["screen_name"]
+    }
+
+    with open("userdata.json", "w") as f:
+        f.write(json.dumps(userdata))
+
     return data["name"], data["screen_name"], response.status_code
+
+
+def saveUsersData(userids: list, config: dict) -> bool:
+    print("[INFO] saveUsersData({userids}, {config})".format(
+        userids=userids, config=config))
+    headers = {
+        "Authorization": "Bearer {token}".format(token=config["bearer_token"])
+    }
+    params = {
+        "user_id": ",".join(userids)
+    }
+    response = requests.get("https://api.twitter.com/1.1/users/lookup.json",
+                            headers=headers, params=params)
+    if response.status_code != 200:
+        print("[Error] " + str(response.status_code))
+        return False
+
+    data = response.json()
+
+    if not os.path.exists("userdata.json"):
+        userdatas = {}
+    else:
+        with open("userdata.json", "r") as f:
+            userdatas = json.load(f)
+
+    for userdata in data:
+        userid = userdata["id_str"]
+        name = userdata["name"]
+        screen_name = userdata["screen_name"]
+        userdatas[userid] = {
+            "name": name,
+            "screen_name": screen_name
+        }
+
+    with open("userdata.json", "w") as f:
+        f.write(json.dumps(userdatas))
+
+    return True
 
 
 def sendMessage(channelId: str, message: str, config: dict):
@@ -62,7 +121,7 @@ def sendMessage(channelId: str, message: str, config: dict):
     print("[INFO] response: {message}".format(message=response.text))
 
 
-def main(target: str):
+def main(target: str, isInit: bool):
     print("[INFO] main({target})".format(target=target))
     if not os.path.exists("config.json"):
         print("[Error] config.json not found")
@@ -82,12 +141,19 @@ def main(target: str):
         print("[Error] API request failed.")
         return
 
-    ids_old = []
-    finalIds_old = []
-    if os.path.exists("{target}_data.json".format(target=target)):
-        with open("{target}_data.json".format(target=target), "r") as f:
-            ids_old = json.load(f)
-            finalIds_old = ids_old
+    if not os.path.exists("{target}_data.json".format(target=target)) or isInit:
+        print("[INFO] Initialize mode")
+
+        slicedIds = [ids[i:i + 100] for i in range(0, len(ids), 100)]
+        for ids in slicedIds:
+            saveUsersData(ids, config)
+
+        print("[INFO] Initialized.")
+        return
+
+    with open("{target}_data.json".format(target=target), "r") as f:
+        ids_old = json.load(f)
+        finalIds_old = ids_old
 
     # New follow(er) users
     messages = [":new:**New {target} users**".format(target=target)]
@@ -125,6 +191,7 @@ os.chdir(sys.path[0])
 
 parser = argparse.ArgumentParser()
 parser.add_argument("target", help="follow or follower")
+parser.add_argument("--init", type=bool, default=False)
 args = parser.parse_args()
 
-main(args.target)
+main(args.target, args.init)

@@ -22,14 +22,16 @@ Rewrite [config.sample.json](config.sample.json) and rename to `config.json`.
 ## Usage
 
 ```shell
-python3 /path/to/main.py
+python3 /path/to/main.py <follow|follower> [--init]
 ```
+
+`follow | follower` is required. If you add `--init`, all user data of followers will be reacquired.
 
 If necessary, register it in Crontab, etc. and run it periodically.
 
 ## Notes
 
-- Currently only Bearer token supported. It has not yet been decided if it will be supported in the future.
+- Currently, only Bearer token supported. It has not yet been decided if it will be supported in the future.
   - For this reason, private accounts are not currently supported.
 
 ## Warning / Disclaimer
@@ -38,4 +40,4 @@ The developer is not responsible for any problems caused by the user using this 
 
 ## License
 
-The license for this project is [MIT License.](LICENSE)
+The license for this project is [MIT License](LICENSE).
