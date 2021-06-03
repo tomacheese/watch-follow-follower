@@ -46,6 +46,8 @@ def getUserData(userid: str, config: dict) -> tuple:
             userdata = json.load(f)
             if userid in userdata:
                 return userdata[userid]["name"], userdata[userid]["screen_name"], response.status_code
+            else:
+                return None, None, error_code
 
     data = response.json()
 
