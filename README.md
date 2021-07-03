@@ -13,7 +13,7 @@ Checks Twitter follow/follower changes and notifies Discord.
 ## Installation
 
 1. Git Clone: `git clone https://github.com/book000/WatchFollowFollower.git`
-2. Install dependency packages from `requirements.txt`: `pip3 install -r -U requirements.txt`
+2. Install dependency packages from `requirements.txt`: `pip3 install -U -r requirements.txt`
 
 ## Configuration
 
