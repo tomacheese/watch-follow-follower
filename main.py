@@ -169,6 +169,9 @@ def main(target: str, isInit: bool):
         name, screen_name, code = getUserData(id, config)
         url = "https://twitter.com/intent/user?user_id={userid}".format(userid=id)
 
+        if code == 50:
+            continue
+
         messages.append(
             "`{name}` `@{screen_name}` ({code}) {url}".format(name=name, screen_name=screen_name, code=code, url=url))
 
