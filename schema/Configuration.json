@@ -1,0 +1,79 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "DestinationConfig": {
+            "properties": {
+                "channel_id": {
+                    "description": "Discord channel ID (required if using bot)",
+                    "type": "string"
+                },
+                "token": {
+                    "description": "Discord bot token (required if using bot)",
+                    "type": "string"
+                },
+                "webhook_url": {
+                    "description": "Discord webhook URL (required if using webhook)",
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "properties": {
+        "discord": {
+            "description": "Discord webhook URL or bot token",
+            "properties": {
+                "follow": {
+                    "$ref": "#/definitions/DestinationConfig",
+                    "description": "Notification recipients when you follow/unfollow"
+                },
+                "follower": {
+                    "$ref": "#/definitions/DestinationConfig",
+                    "description": "Notification recipient when you are followed / no longer a follower."
+                }
+            },
+            "required": [
+                "follow",
+                "follower"
+            ],
+            "type": "object"
+        },
+        "twitter": {
+            "description": "Twitter API keys",
+            "properties": {
+                "access_token": {
+                    "description": "Twitter API (v1) access token",
+                    "type": "string"
+                },
+                "access_token_secret": {
+                    "description": "Twitter API (v1) access token secret",
+                    "type": "string"
+                },
+                "consumer_key": {
+                    "description": "Twitter API (v1) consumer key",
+                    "type": "string"
+                },
+                "consumer_secret": {
+                    "description": "Twitter API (v1) consumer secret",
+                    "type": "string"
+                },
+                "target_user_id": {
+                    "description": "Target user id",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "consumer_key",
+                "consumer_secret",
+                "target_user_id"
+            ],
+            "type": "object"
+        }
+    },
+    "required": [
+        "discord",
+        "twitter"
+    ],
+    "type": "object"
+}
+

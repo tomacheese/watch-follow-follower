@@ -1,7 +1,6 @@
-.idea
-venv
+node_modules/
+data/
+dist/
+output/
 
 config.json
-userdata.json
-follow_data.json
-follower_data.json
