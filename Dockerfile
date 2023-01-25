@@ -30,7 +30,7 @@ COPY --from=builder /app/output .
 
 ENV NODE_ENV=production
 ENV CONFIG_FILE=/data/config.json
-ENV USERS_FILE=/data/notified.json
+ENV USERS_FILE=/data/users.json
 
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
