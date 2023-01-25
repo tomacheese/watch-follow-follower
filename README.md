@@ -1,42 +1,49 @@
-# WatchFollowFollower
+# watch-follow-follower
 
 Checks Twitter follow/follower changes and notifies Discord.
 
-## Requirements
-
-- Twitter API key, API secret key (From [apps.twitter.com](https://apps.twitter.com))
-- Vaild Bearer token (Currently only Bearer token supported)
-- Vaild Discord Bot token and Writeable message channel
--  Python 3.6+
-- [requirements.txt](requirements.txt): `requests`
-
 ## Installation
 
-1. Git Clone: `git clone https://github.com/book000/WatchFollowFollower.git`
-2. Install dependency packages from `requirements.txt`: `pip3 install -U -r requirements.txt`
+Works in Node.js or Docker (Compose) environment.
+
+### Docker (Recommended)
+
+If you want to use Docker, write the following in `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+services:
+  app:
+    image: ghcr.io/tomacheese/watch-follow-follower:latest
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data/
+    init: true
+    restart: always
+```
+
+After that, you can start it with `docker-compose up -d` after creating a configuration file with reference to [Configuration section](#configuration).
+
+### Node.js
+
+If you are running in a Node.js environment, Node.js v18 is recommended.
+
+Download `index.js` from the [release page](https://github.com/tomacheese/watch-follow-follower/releases) in the latest release.  
+After that, you can start it with `node index.js` after creating a configuration file with reference to [Configuration section](#configuration).
 
 ## Configuration
 
-Rewrite [config.sample.json](config.sample.json) and rename to `config.json`.
+The configuration file `data/config.json` is used by default.  
+If the environment variable `CONFIG_FILE` is set, the specified value is taken as the path to the configuration file.
 
-## Usage
+See here for the JSON Schema of the configuration file: [schema/Configuration.json](schema/Configuration.json)
 
-```shell
-python3 /path/to/main.py <follow|follower> [--init]
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/tomacheese/watch-follow-follower/master/schema/Configuration.json"
+}
 ```
-
-`follow | follower` is required. If you add `--init`, all user data of followers will be reacquired.
-
-If necessary, register it in Crontab, etc. and run it periodically.
-
-## Notes
-
-- Currently, only Bearer token supported. It has not yet been decided if it will be supported in the future.
-  - For this reason, private accounts are not currently supported.
-
-## Warning / Disclaimer
-
-The developer is not responsible for any problems caused by the user using this project.
 
 ## License
 
