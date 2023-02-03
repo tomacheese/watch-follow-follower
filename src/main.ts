@@ -169,7 +169,7 @@ async function main() {
   )
   if (newFollowerUsers.length > 0) {
     sendDiscordMessage(
-      config.discord.follow,
+      config.discord.follower,
       `:new: **New follower users**\n` + newFollowerUsers.join('\n')
     )
   }
@@ -180,7 +180,7 @@ async function main() {
   )
   if (removedFollowerUsers.length > 0) {
     sendDiscordMessage(
-      config.discord.follow,
+      config.discord.follower,
       `:wave: **Unfollower users**\n` + removedFollowerUsers.join('\n')
     )
   }
