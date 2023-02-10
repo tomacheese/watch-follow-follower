@@ -1,24 +1,14 @@
-import { TwitterApi } from 'twitter-api-v2'
-import { Configuration, loadConfig, loadTwitterApi, PATH } from './config'
+import { loadConfig, PATH } from './config'
+import { Logger } from './logger'
+import { TwApi } from './twitter'
 import { IUserData, UsersManager } from './users-manager'
-import {
-  getTwitterFollowerIds,
-  getTwitterFollowids,
-  getTwitterUsersData,
-  getTwitterUserStatusCode,
-  sendDiscordMessage,
-  sliceArray,
-} from './utils'
+import { sendDiscordMessage, sliceArray } from './utils'
 
 interface IUserStatusCodes {
   [key: string]: number | undefined
 }
 
-async function getUserData(
-  twitterApi: TwitterApi,
-  manager: UsersManager,
-  ids: string[]
-) {
+async function getUserData(twApi: TwApi, manager: UsersManager, ids: string[]) {
   // キャッシュに存在するユーザーのデータを取得
   // キャッシュに存在しない場合は getTwitterUsersData メソッドで取得
   const users: IUserData[] = [] // ユーザーのデータを格納する配列
@@ -35,7 +25,7 @@ async function getUserData(
   // users/lookup は 100 件までしか取得できないので、100 件ごとに分割して取得
   const slicedIds = sliceArray(notCachedIds, 100)
   for (const ids of slicedIds) {
-    const newUsers = await getTwitterUsersData(twitterApi, ids)
+    const newUsers = await twApi.getUsersById(ids)
     users.push(
       ...newUsers.map((user) => ({
         user_id: user.id_str,
@@ -56,9 +46,8 @@ async function getUserData(
 }
 
 async function checkFollow(
-  config: Configuration,
   manager: UsersManager,
-  twitterApi: TwitterApi,
+  twApi: TwApi,
   type: 'follow' | 'follower'
 ): Promise<{ newIds: string[]; removedIds: string[] }> {
   const getPreviousIdsMethod =
@@ -66,7 +55,9 @@ async function checkFollow(
       ? manager.getFollowIds.bind(manager)
       : manager.getFollowerIds.bind(manager)
   const getIdsMethod =
-    type === 'follow' ? getTwitterFollowids : getTwitterFollowerIds
+    type === 'follow'
+      ? twApi.getFollowingIds.bind(twApi)
+      : twApi.getFollowersIds.bind(twApi)
   const setIdsMethod =
     type === 'follow'
       ? manager.setFollowIds.bind(manager)
@@ -75,7 +66,7 @@ async function checkFollow(
   /** 前回フォローしていた/フォロワーだったユーザーの ID */
   const previousIds = getPreviousIdsMethod()
   /** 現在フォローしている/フォロワーなユーザーの ID */
-  const nowIds = await getIdsMethod(twitterApi, config.twitter.target_user_id)
+  const nowIds = await getIdsMethod()
 
   /** 新しくフォローした/フォロワーのユーザー ID */
   const newIds = nowIds.filter((id) => !previousIds.includes(id))
@@ -99,29 +90,41 @@ function formatUser(
   const userData = userDataes.find((data) => data.user_id === userId)
   const userStatusCode = userStatusCodes[userId] || 'NULL'
   if (!userData) {
-    return `*?* *@?* (${userStatusCode} https://twitter.com/intent/user?user_id=${userId}`
+    return `*?* *@?* (${userStatusCode} https://twitter.com/i/user/${userId}`
   }
-  return `\`${userData.name}\` \`@${userData.screen_name}\` (${userStatusCode}) https://twitter.com/intent/user?user_id=${userId}`
+  return `\`${userData.name}\` \`@${userData.screen_name}\` (${userStatusCode}) https://twitter.com/i/user/${userId}`
 }
 
 async function main() {
+  const logger = Logger.configure('main')
+  logger.info('✨ main()')
+
   const config = loadConfig()
-  const twitterApi = await loadTwitterApi(config)
+  const twApi = new TwApi(config)
   const manager = new UsersManager(PATH.USERS_FILE)
 
   const isFirstLoad = manager.isFirstLoad
+  if (isFirstLoad) {
+    logger.info('💚 First running. Skip notification.')
+  }
 
   const { newIds: newFollowIds, removedIds: removedFollowIds } =
-    await checkFollow(config, manager, twitterApi, 'follow')
+    await checkFollow(manager, twApi, 'follow')
   const { newIds: newFollowerIds, removedIds: removedFollowerIds } =
-    await checkFollow(config, manager, twitterApi, 'follower')
+    await checkFollow(manager, twApi, 'follower')
+  logger.info(
+    `🧑‍🤝‍🧑 New following: ${newFollowIds.length} / New follower: ${newFollowerIds.length}`
+  )
+  logger.info(
+    `🧑‍🤝‍🧑 Unfollowing: ${removedFollowIds.length} / Unfollower: ${removedFollowerIds.length}`
+  )
 
   // ユーザーデータを取得
   const userDataes = await Promise.all([
-    getUserData(twitterApi, manager, newFollowIds),
-    getUserData(twitterApi, manager, newFollowerIds),
-    getUserData(twitterApi, manager, removedFollowIds),
-    getUserData(twitterApi, manager, removedFollowerIds),
+    getUserData(twApi, manager, newFollowIds),
+    getUserData(twApi, manager, newFollowerIds),
+    getUserData(twApi, manager, removedFollowIds),
+    getUserData(twApi, manager, removedFollowerIds),
   ]).then((data) => data.flat())
 
   // 通知する
@@ -138,7 +141,8 @@ async function main() {
     ...removedFollowIds,
     ...removedFollowerIds,
   ])) {
-    userStatusCodes[id] = await getTwitterUserStatusCode(twitterApi, id)
+    // userStatusCodes[id] = await getTwitterUserStatusCode(twitterApi, id)
+    userStatusCodes[id] = -1 // TODO
   }
 
   // 通知する : フォローした
@@ -146,6 +150,7 @@ async function main() {
     formatUser(userDataes, userStatusCodes, id)
   )
   if (newFollowUsers.length > 0) {
+    logger.info(`📣 Notification: New follow users`)
     sendDiscordMessage(
       config.discord.follow,
       `:new: **New follow users**\n` + newFollowUsers.join('\n')
@@ -157,6 +162,7 @@ async function main() {
     formatUser(userDataes, userStatusCodes, id)
   )
   if (removedFollowUsers.length > 0) {
+    logger.info(`📣 Notification: Unfollow users`)
     sendDiscordMessage(
       config.discord.follow,
       `:wave: **Unfollow users**\n` + removedFollowUsers.join('\n')
@@ -168,6 +174,7 @@ async function main() {
     formatUser(userDataes, userStatusCodes, id)
   )
   if (newFollowerUsers.length > 0) {
+    logger.info(`📣 Notification: New follower users`)
     sendDiscordMessage(
       config.discord.follower,
       `:new: **New follower users**\n` + newFollowerUsers.join('\n')
@@ -179,6 +186,7 @@ async function main() {
     formatUser(userDataes, userStatusCodes, id)
   )
   if (removedFollowerUsers.length > 0) {
+    logger.info(`📣 Notification: Unfollower users`)
     sendDiscordMessage(
       config.discord.follower,
       `:wave: **Unfollower users**\n` + removedFollowerUsers.join('\n')
