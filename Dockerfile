@@ -31,6 +31,7 @@ COPY --from=builder /app/output .
 ENV NODE_ENV=production
 ENV CONFIG_FILE=/data/config.json
 ENV USERS_FILE=/data/users.json
+ENV LOG_DIR /data/logs
 
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh

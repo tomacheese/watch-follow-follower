@@ -38,6 +38,29 @@
             ],
             "type": "object"
         },
+        "twapi": {
+            "properties": {
+                "base_url": {
+                    "type": "string"
+                },
+                "basic_password": {
+                    "type": "string"
+                },
+                "basic_username": {
+                    "type": "string"
+                },
+                "target_user_id": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "base_url",
+                "basic_password",
+                "basic_username",
+                "target_user_id"
+            ],
+            "type": "object"
+        },
         "twitter": {
             "description": "Twitter API keys",
             "properties": {

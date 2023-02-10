@@ -29,6 +29,13 @@ export interface Configuration {
     /** Target user id */
     target_user_id: string
   }
+  /* tomacheese/twapi */
+  twapi?: {
+    base_url: string
+    basic_username: string
+    basic_password: string
+    target_user_id: string
+  }
   /** Discord webhook URL or bot token */
   discord: {
     /** Notification recipients when you follow/unfollow */
