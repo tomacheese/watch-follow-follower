@@ -104,19 +104,16 @@ async function main() {
   const manager = new UsersManager(PATH.USERS_FILE)
 
   const isFirstLoad = manager.isFirstLoad
-  if (isFirstLoad) {
-    logger.info('💚 First running. Skip notification.')
-  }
 
   const { newIds: newFollowIds, removedIds: removedFollowIds } =
     await checkFollow(manager, twApi, 'follow')
   const { newIds: newFollowerIds, removedIds: removedFollowerIds } =
     await checkFollow(manager, twApi, 'follower')
   logger.info(
-    `🧑‍🤝‍🧑 New following: ${newFollowIds.length} / New follower: ${newFollowerIds.length}`
+    `🆕 New following: ${newFollowIds.length} / New follower: ${newFollowerIds.length}`
   )
   logger.info(
-    `🧑‍🤝‍🧑 Unfollowing: ${removedFollowIds.length} / Unfollower: ${removedFollowerIds.length}`
+    `👋 Unfollowing: ${removedFollowIds.length} / Unfollower: ${removedFollowerIds.length}`
   )
 
   // ユーザーデータを取得
@@ -130,6 +127,7 @@ async function main() {
   // 通知する
   if (isFirstLoad) {
     // 初回実行時は通知しない
+    logger.info('💚 First running... saved! Skip notification.')
     return
   }
 
