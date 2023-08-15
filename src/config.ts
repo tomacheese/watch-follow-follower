@@ -50,7 +50,7 @@ export function loadConfig(): Configuration {
 }
 
 export async function loadTwitterApi(
-  config: Configuration
+  config: Configuration,
 ): Promise<TwitterApi> {
   const api = new TwitterApi({
     appKey: config.twitter.consumer_key,

@@ -31,7 +31,7 @@ async function getUserData(twApi: TwApi, manager: UsersManager, ids: string[]) {
         user_id: user.id_str,
         name: user.name,
         screen_name: user.screen_name,
-      }))
+      })),
     )
     for (const user of newUsers.map((user) => ({
       user_id: user.id_str,
@@ -48,7 +48,7 @@ async function getUserData(twApi: TwApi, manager: UsersManager, ids: string[]) {
 async function checkFollow(
   manager: UsersManager,
   twApi: TwApi,
-  type: 'follow' | 'follower'
+  type: 'follow' | 'follower',
 ): Promise<{ newIds: string[]; removedIds: string[] }> {
   const getPreviousIdsMethod =
     type === 'follow'
@@ -85,7 +85,7 @@ async function checkFollow(
 function formatUser(
   userDataes: IUserData[],
   userStatusCodes: IUserStatusCodes,
-  userId: string
+  userId: string,
 ) {
   const userData = userDataes.find((data) => data.user_id === userId)
   const userStatusCode = userStatusCodes[userId] || 'NULL'
@@ -110,10 +110,10 @@ async function main() {
   const { newIds: newFollowerIds, removedIds: removedFollowerIds } =
     await checkFollow(manager, twApi, 'follower')
   logger.info(
-    `🆕 New following: ${newFollowIds.length} / New follower: ${newFollowerIds.length}`
+    `🆕 New following: ${newFollowIds.length} / New follower: ${newFollowerIds.length}`,
   )
   logger.info(
-    `👋 Unfollowing: ${removedFollowIds.length} / Unfollower: ${removedFollowerIds.length}`
+    `👋 Unfollowing: ${removedFollowIds.length} / Unfollower: ${removedFollowerIds.length}`,
   )
 
   // ユーザーデータを取得
@@ -145,49 +145,49 @@ async function main() {
 
   // 通知する : フォローした
   const newFollowUsers = newFollowIds.map((id) =>
-    formatUser(userDataes, userStatusCodes, id)
+    formatUser(userDataes, userStatusCodes, id),
   )
   if (newFollowUsers.length > 0) {
     logger.info(`📣 Notification: New follow users`)
     sendDiscordMessage(
       config.discord.follow,
-      `:new: **New follow users**\n` + newFollowUsers.join('\n')
+      `:new: **New follow users**\n` + newFollowUsers.join('\n'),
     )
   }
 
   // 通知する : フォロー解除した
   const removedFollowUsers = removedFollowIds.map((id) =>
-    formatUser(userDataes, userStatusCodes, id)
+    formatUser(userDataes, userStatusCodes, id),
   )
   if (removedFollowUsers.length > 0) {
     logger.info(`📣 Notification: Unfollow users`)
     sendDiscordMessage(
       config.discord.follow,
-      `:wave: **Unfollow users**\n` + removedFollowUsers.join('\n')
+      `:wave: **Unfollow users**\n` + removedFollowUsers.join('\n'),
     )
   }
 
   // 通知する : フォロワーになった
   const newFollowerUsers = newFollowerIds.map((id) =>
-    formatUser(userDataes, userStatusCodes, id)
+    formatUser(userDataes, userStatusCodes, id),
   )
   if (newFollowerUsers.length > 0) {
     logger.info(`📣 Notification: New follower users`)
     sendDiscordMessage(
       config.discord.follower,
-      `:new: **New follower users**\n` + newFollowerUsers.join('\n')
+      `:new: **New follower users**\n` + newFollowerUsers.join('\n'),
     )
   }
 
   // 通知する : フォロワーではなくなった
   const removedFollowerUsers = removedFollowerIds.map((id) =>
-    formatUser(userDataes, userStatusCodes, id)
+    formatUser(userDataes, userStatusCodes, id),
   )
   if (removedFollowerUsers.length > 0) {
     logger.info(`📣 Notification: Unfollower users`)
     sendDiscordMessage(
       config.discord.follower,
-      `:wave: **Unfollower users**\n` + removedFollowerUsers.join('\n')
+      `:wave: **Unfollower users**\n` + removedFollowerUsers.join('\n'),
     )
   }
 }

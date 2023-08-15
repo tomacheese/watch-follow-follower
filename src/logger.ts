@@ -85,7 +85,7 @@ export class Logger {
           format: 'YYYY-MM-DD hh:mm:ss.SSS',
         }),
         logFileFormat,
-      ].filter((f) => f !== undefined) as Format[])
+      ].filter((f) => f !== undefined) as Format[]),
     )
     const consoleFormat = format.combine(
       ...([
@@ -97,7 +97,7 @@ export class Logger {
           format: 'YYYY-MM-DD hh:mm:ss.SSS',
         }),
         textFormat,
-      ].filter((f) => f !== undefined) as Format[])
+      ].filter((f) => f !== undefined) as Format[]),
     )
     const extension = selectLogFileFormat === 'ndjson' ? 'ndjson' : 'log'
     const transportRotateFile = new WinstonDailyRotateFile({

@@ -3,7 +3,7 @@ import { DestinationConfig } from './config'
 
 export async function sendDiscordMessage(
   destinationConfig: DestinationConfig,
-  text: string
+  text: string,
 ): Promise<void> {
   // webhook or bot
   if (destinationConfig.webhook_url) {
@@ -27,7 +27,7 @@ export async function sendDiscordMessage(
         headers: {
           Authorization: `Bot ${destinationConfig.token}`,
         },
-      }
+      },
     )
     if (response.status !== 200) {
       throw new Error(`Discord bot failed (${response.status})`)
@@ -37,6 +37,6 @@ export async function sendDiscordMessage(
 
 export function sliceArray<T>(array: T[], size: number): T[][] {
   return Array.from({ length: Math.ceil(array.length / size) }, (_, index) =>
-    array.slice(index * size, index * size + size)
+    array.slice(index * size, index * size + size),
   )
 }

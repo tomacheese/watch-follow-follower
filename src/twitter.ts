@@ -68,8 +68,8 @@ export class TwApi {
       const users = await this.getFollowingFromTwApi()
       this.users.push(
         ...users.filter(
-          (user) => !this.users.some((u) => u.id_str === user.id_str)
-        )
+          (user) => !this.users.some((u) => u.id_str === user.id_str),
+        ),
       )
       return users.map((user) => user.id_str)
     }
@@ -110,8 +110,8 @@ export class TwApi {
       const users = await this.getFollowersFromTwApi()
       this.users.push(
         ...users.filter(
-          (user) => !this.users.some((u) => u.id_str === user.id_str)
-        )
+          (user) => !this.users.some((u) => u.id_str === user.id_str),
+        ),
       )
       return users.map((user) => user.id_str)
     }
