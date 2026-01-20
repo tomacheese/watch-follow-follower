@@ -22,9 +22,10 @@ on:
       - synchronize
       - reopened
       - closed
+  merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.merged == true && 'master' || github.event.pull_request.head.sha }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.merged == true && github.base_ref || github.event.pull_request.head.sha }}
 
 jobs:
   docker-ci:
@@ -33,8 +34,11 @@ jobs:
     with:
       targets: >-
         [
-          { imageName: "tomacheese/watch-follow-follower", context: ".", file: "Dockerfile", packageName: "watch-follow-follower" }
+          { imageName: "tomacheese/follow-follower-checker", context: ".", file: "Dockerfile", packageName: "follow-follower-checker" }
         ]
+      # registry: registry.hub.docker.com # default: ghcr.io
+      # platforms: linux/amd64 # default: linux/amd64,linux/arm64
     secrets:
       DOCKER_USERNAME: ${{ github.actor }}
       DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+

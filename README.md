@@ -1,50 +1,97 @@
 # watch-follow-follower
 
-Checks Twitter follow/follower changes and notifies Discord.
+Version 3 of a lightweight checker that captures X (Twitter) follower/following snapshots, diffs changes, and optionally posts a Discord notification.
 
-## Installation
+## Features
+- Fetch followers and following for a target account
+- Save snapshots as JSON and compute diffs on subsequent runs
+- Optional Discord webhook notifications
+- Cookie cache to reduce login frequency
+- Optional proxy support
 
-Works in Node.js or Docker (Compose) environment.
+## Requirements
+- Node.js (22 LTS recommended)
+- pnpm
 
-### Docker (Recommended)
+## Setup
 
-If you want to use Docker, write the following in `docker-compose.yml`:
-
-```yaml
-version: '3.8'
-services:
-  app:
-    image: ghcr.io/tomacheese/watch-follow-follower:latest
-    volumes:
-      - type: bind
-        source: ./data
-        target: /data/
-    init: true
-    restart: always
+```bash
+pnpm install
 ```
 
-After that, you can start it with `docker-compose up -d` after creating a configuration file with reference to [Configuration section](#configuration).
+### Configuration
+You can use either a config file or environment variables.
 
-### Node.js
+1) Copy the sample config:
 
-If you are running in a Node.js environment, Node.js v18 is recommended.
-
-Download `index.js` from the [release page](https://github.com/tomacheese/watch-follow-follower/releases) in the latest release.  
-After that, you can start it with `node index.js` after creating a configuration file with reference to [Configuration section](#configuration).
-
-## Configuration
-
-The configuration file `data/config.json` is used by default.  
-If the environment variable `CONFIG_FILE` is set, the specified value is taken as the path to the configuration file.
-
-See here for the JSON Schema of the configuration file: [schema/Configuration.json](schema/Configuration.json)
-
-```json
-{
-  "$schema": "https://raw.githubusercontent.com/tomacheese/watch-follow-follower/master/schema/Configuration.json"
-}
+```bash
+mkdir -p data
+cp config.sample.json data/config.json
 ```
+
+2) Edit `data/config.json` with your credentials.
+
+The default config path is `./data/config.json`. You can override it with `CONFIG_PATH`.
+
+### Run
+
+```bash
+pnpm start
+```
+
+## Environment Variables
+
+Required (if not using config file):
+- `TWITTER_USERNAME`
+- `TWITTER_PASSWORD`
+
+Optional:
+- `TWITTER_EMAIL_ADDRESS`
+- `TWITTER_AUTH_CODE_SECRET` (2FA secret)
+- `TWITTER_TARGET_USERNAME` or `TARGET_USERNAME` (defaults to login username)
+- `CONFIG_PATH` (default: `./data/config.json`)
+- `OUTPUT_DIR` (default: `./data`)
+- `COOKIE_CACHE_PATH` (default: `./data/twitter-cookies.json`)
+- `PROXY_SERVER` (format: `host:port` or `http(s)://host:port`)
+- `PROXY_USERNAME`
+- `PROXY_PASSWORD`
+
+## Output
+
+Snapshots and diff files are saved under:
+
+```
+<OUTPUT_DIR>/<targetUsername>/{followers.json,following.json,diff.json}
+```
+
+The `diff.json` file is generated only if a previous snapshot exists.
+
+## Docker
+
+Build and run (config file):
+
+```bash
+docker build -t watch-follow-follower .
+docker run --rm \
+  -v $(pwd)/data:/app/data \
+  watch-follow-follower
+```
+
+Run with environment variables instead of a config file:
+
+```bash
+docker run --rm \
+  -e TWITTER_USERNAME=... \
+  -e TWITTER_PASSWORD=... \
+  -e TWITTER_EMAIL_ADDRESS=... \
+  -v $(pwd)/data:/app/data \
+  watch-follow-follower
+```
+
+## Notes
+- This project relies on unofficial APIs. Usage may break due to upstream changes.
+- Keep your credentials and cookie cache private.
+- `data/` should never be committed; it is ignored by default.
 
 ## License
-
-The license for this project is [MIT License](LICENSE).
+MIT
