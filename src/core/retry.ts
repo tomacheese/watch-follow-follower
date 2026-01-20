@@ -1,11 +1,4 @@
 /**
- * 指数バックオフ付きの汎用リトライ。
- * @typeParam T 返却型。
- * @param fn 実行する関数。
- * @param options リトライ設定。
- * @returns 成功時の戻り値。
- */
-/**
  * 429 の Rate Limit から待機時間を計算する。
  * @param error 例外。
  * @returns 待機ミリ秒。判定できない場合は null。
@@ -13,7 +6,7 @@
 export function getRateLimitDelayMs(error: unknown): number | null {
   const err = error as { response?: Response; message?: string }
   const response = err.response
-  if (!response || response.status !== 429) {
+  if (response?.status !== 429) {
     return null
   }
   const resetHeader = response.headers.get('x-rate-limit-reset')

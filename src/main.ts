@@ -167,4 +167,7 @@ async function main(): Promise<void> {
   process.exitCode = exitCode
 }
 
-void main()
+main().catch((error) => {
+  console.error('Fatal error occurred', error)
+  process.exitCode = 1
+})

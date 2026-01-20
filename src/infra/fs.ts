@@ -6,13 +6,13 @@ import path from 'node:path'
  * @param filePath ファイルパス。
  * @returns 読み込み結果。失敗時は null。
  */
-export function readJsonFile(filePath: string): unknown | null {
+export function readJsonFile(filePath: string): unknown {
   if (!fs.existsSync(filePath)) {
     return null
   }
   const raw = fs.readFileSync(filePath, 'utf8')
   try {
-    return JSON.parse(raw) as T
+    return JSON.parse(raw) as unknown
   } catch {
     return null
   }
