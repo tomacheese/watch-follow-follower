@@ -12,84 +12,153 @@ const COOKIE_CACHE_FILE =
   process.env.COOKIE_CACHE_PATH ?? './data/twitter-cookies.json'
 const COOKIE_EXPIRY_DAYS = 7
 
+/**
+ * JSON から読み込むアプリ設定。
+ */
 interface AppConfig {
   twitter: {
+    /** ログイン用ユーザー名（スクリーンネーム）。 */
     username: string
+    /** ログイン用パスワード。 */
     password: string
+    /** ログイン用メールアドレス（任意）。 */
     emailAddress?: string
   }
   discord?: {
+    /** Discord Webhook URL。 */
     webhookUrl?: string
   }
 }
 
+/**
+ * 環境変数や設定ファイルから解決した認証情報。
+ */
 interface Credentials {
+  /** ログイン用ユーザー名（スクリーンネーム）。 */
   username: string
+  /** ログイン用パスワード。 */
   password: string
+  /** ログイン用メールアドレス（任意）。 */
   emailAddress?: string
+  /** 2FA シークレット（TOTP、任意）。 */
   twoFactorSecret?: string
 }
 
+/**
+ * Discord 通知設定。
+ */
 interface DiscordConfig {
+  /** 通知投稿先の Webhook URL。 */
   webhookUrl?: string
 }
 
+/**
+ * ディスクに保存する認証 Cookie キャッシュ。
+ */
 interface CachedCookies {
+  /** auth_token の値。 */
   auth_token: string
+  /** ct0 の値。 */
   ct0: string
+  /** 保存時刻（ミリ秒の epoch）。 */
   savedAt: number
 }
 
+/**
+ * スナップショット出力用に正規化したユーザー情報。
+ */
 interface UserSnapshot {
+  /** ユーザー ID（restId）。 */
   id: string
+  /** スクリーンネーム（@なし）。 */
   screenName: string
+  /** 表示名。 */
   name: string
+  /** 従来の認証済みフラグ。 */
   verified: boolean
+  /** Blue 認証フラグ。 */
   isBlueVerified: boolean
+  /** 非公開アカウントフラグ。 */
   protected: boolean
 }
 
+/**
+ * ディスクに保存するスナップショットファイル。
+ */
 interface SnapshotFile {
+  /** 対象のスクリーンネーム。 */
   targetUsername: string
+  /** 対象のユーザー ID。 */
   targetUserId: string
+  /** 取得時刻（ISO 文字列）。 */
   fetchedAt: string
+  /** スナップショットのユーザー一覧。 */
   users: UserSnapshot[]
 }
 
+/**
+ * ディスクに保存する差分ファイル。
+ */
 interface DiffFile {
+  /** 対象のスクリーンネーム。 */
   targetUsername: string
+  /** 対象のユーザー ID。 */
   targetUserId: string
+  /** 差分生成時刻（ISO 文字列）。 */
   generatedAt: string
   previousFetchedAt: {
+    /** 前回の followers 取得時刻（なければ null）。 */
     followers: string | null
+    /** 前回の following 取得時刻（なければ null）。 */
     following: string | null
   }
   currentFetchedAt: {
+    /** 今回の followers 取得時刻。 */
     followers: string
+    /** 今回の following 取得時刻。 */
     following: string
   }
   followers: {
+    /** 追加された followers。 */
     added: UserSnapshot[]
+    /** 削除された followers。 */
     removed: UserSnapshot[]
   }
   following: {
+    /** 追加された following。 */
     added: UserSnapshot[]
+    /** 削除された following。 */
     removed: UserSnapshot[]
   }
 }
 
+/**
+ * undici/Headers 互換の Headers 形状。
+ */
 interface HeadersLike {
+  /** entries がある場合のイテレータ。 */
   entries?: () => IterableIterator<[string, string]>
+  /** イテレータ対応（任意）。 */
   [Symbol.iterator]?: () => Iterator<[string, string]>
 }
 
 let cycleTLSInstancePromise: Promise<CycleTLSClient> | null = null
 
+/**
+ * CycleTLS インスタンスを初期化し、共有する。
+ * @returns CycleTLS クライアント。
+ */
 async function initCycleTLSWithProxy(): Promise<CycleTLSClient> {
   cycleTLSInstancePromise ??= initCycleTLS()
   return cycleTLSInstancePromise
 }
 
+/**
+ * CycleTLS を使った fetch 実装（プロキシ対応）。
+ * @param input fetch の入力。
+ * @param init fetch の初期化オプション。
+ * @returns Fetch レスポンス。
+ */
 async function cycleTLSFetchWithProxy(
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -218,6 +287,11 @@ async function cycleTLSFetchWithProxy(
   })
 }
 
+/**
+ * Cookie キャッシュの構造が妥当か判定する。
+ * @param data 判定対象。
+ * @returns 妥当なら true。
+ */
 function isValidCachedCookies(data: unknown): data is CachedCookies {
   if (typeof data !== 'object' || data === null) {
     return false
@@ -230,6 +304,10 @@ function isValidCachedCookies(data: unknown): data is CachedCookies {
   )
 }
 
+/**
+ * Cookie キャッシュを読み込む（期限切れは無効）。
+ * @returns 有効なキャッシュ、なければ null。
+ */
 function loadCachedCookies(): CachedCookies | null {
   try {
     if (!fs.existsSync(COOKIE_CACHE_FILE)) {
@@ -251,6 +329,11 @@ function loadCachedCookies(): CachedCookies | null {
   }
 }
 
+/**
+ * Cookie キャッシュを保存する。
+ * @param authToken auth_token の値。
+ * @param ct0 ct0 の値。
+ */
 function saveCookies(authToken: string, ct0: string): void {
   const dir = path.dirname(COOKIE_CACHE_FILE)
   if (dir && dir !== '.' && !fs.existsSync(dir)) {
@@ -264,6 +347,13 @@ function saveCookies(authToken: string, ct0: string): void {
   fs.writeFileSync(COOKIE_CACHE_FILE, JSON.stringify(data, null, 2))
 }
 
+/**
+ * 指数バックオフ付きの汎用リトライ。
+ * @typeParam T 返却型。
+ * @param fn 実行する関数。
+ * @param options リトライ設定。
+ * @returns 成功時の戻り値。
+ */
 async function withRetry<T>(
   fn: () => Promise<T>,
   options: {
@@ -308,6 +398,11 @@ async function withRetry<T>(
   throw new Error(`${operationName} failed after ${maxRetries} attempts`)
 }
 
+/**
+ * 429 の Rate Limit から待機時間を計算する。
+ * @param error 例外。
+ * @returns 待機ミリ秒。判定できない場合は null。
+ */
 function getRateLimitDelayMs(error: unknown): number | null {
   const err = error as { response?: Response; message?: string }
   if (!err?.response || err.response.status !== 429) {
@@ -335,6 +430,16 @@ function getRateLimitDelayMs(error: unknown): number | null {
   return 30_000
 }
 
+/**
+ * 503 対応のログインリトライ。
+ * @param scraper Scraper インスタンス。
+ * @param username ユーザー名。
+ * @param password パスワード。
+ * @param email メールアドレス（任意）。
+ * @param twoFactorSecret 2FA シークレット（任意）。
+ * @param maxRetries 最大リトライ回数。
+ * @returns なし。
+ */
 async function loginWithRetry(
   scraper: Scraper,
   username: string,
@@ -365,6 +470,10 @@ async function loginWithRetry(
   }
 }
 
+/**
+ * 設定ファイルを読み込む。
+ * @returns 設定内容。
+ */
 function loadConfig(): AppConfig {
   if (!fs.existsSync(CONFIG_PATH)) {
     throw new Error(`Config file not found: ${CONFIG_PATH}`)
@@ -381,6 +490,10 @@ function loadConfig(): AppConfig {
   return config
 }
 
+/**
+ * 認証情報を環境変数/設定ファイルから解決する。
+ * @returns 認証情報。
+ */
 function getCredentials(): Credentials {
   const envUsername = process.env.TWITTER_USERNAME
   const envPassword = process.env.TWITTER_PASSWORD
@@ -410,6 +523,10 @@ function getCredentials(): Credentials {
   }
 }
 
+/**
+ * Discord 設定を取得する。
+ * @returns Discord 設定。なければ null。
+ */
 function getDiscordConfig(): DiscordConfig | null {
   if (!fs.existsSync(CONFIG_PATH)) {
     return null
@@ -418,6 +535,11 @@ function getDiscordConfig(): DiscordConfig | null {
   return config.discord ?? null
 }
 
+/**
+ * 取得対象のユーザー名を決定する。
+ * @param defaultUsername 既定のユーザー名。
+ * @returns 対象ユーザー名。
+ */
 function getTargetUsername(defaultUsername: string): string {
   return (
     process.env.TWITTER_TARGET_USERNAME ??
@@ -426,6 +548,11 @@ function getTargetUsername(defaultUsername: string): string {
   )
 }
 
+/**
+ * 認証 Cookie を取得する（キャッシュ利用あり）。
+ * @param credentials 認証情報。
+ * @returns auth_token と ct0。
+ */
 async function getAuthCookies(
   credentials: Credentials,
 ): Promise<{ authToken: string; ct0: string }> {
@@ -466,6 +593,11 @@ async function getAuthCookies(
   return { authToken, ct0 }
 }
 
+/**
+ * API レスポンスから UserSnapshot に正規化する。
+ * @param data API レスポンス。
+ * @returns 正規化済みユーザー。取得できない場合は null。
+ */
 function normalizeUserSnapshot(data: unknown): UserSnapshot | null {
   if (!data || typeof data !== 'object') {
     return null
@@ -509,6 +641,11 @@ function normalizeUserSnapshot(data: unknown): UserSnapshot | null {
   }
 }
 
+/**
+ * ユーザー一覧を安定した順序でソートする。
+ * @param users ユーザー一覧。
+ * @returns ソート済みユーザー一覧。
+ */
 function sortUsers(users: UserSnapshot[]): UserSnapshot[] {
   return [...users].sort((a, b) => {
     const nameCompare = a.screenName.localeCompare(b.screenName, 'en')
@@ -519,6 +656,12 @@ function sortUsers(users: UserSnapshot[]): UserSnapshot[] {
   })
 }
 
+/**
+ * カーソルを辿って全ページ取得する。
+ * @param label ログ用ラベル。
+ * @param fetchPage 1ページ取得関数。
+ * @returns ユーザー一覧。
+ */
 async function fetchAllUsers(
   label: string,
   fetchPage: (cursor?: string) => Promise<{
@@ -577,6 +720,12 @@ async function fetchAllUsers(
   return sortUsers(users)
 }
 
+/**
+ * JSON ファイルを読み込む。
+ * @typeParam T 返却型。
+ * @param filePath ファイルパス。
+ * @returns 読み込み結果。失敗時は null。
+ */
 function readJsonFile<T>(filePath: string): T | null {
   if (!fs.existsSync(filePath)) {
     return null
@@ -589,6 +738,11 @@ function readJsonFile<T>(filePath: string): T | null {
   }
 }
 
+/**
+ * JSON ファイルを書き込む。
+ * @param filePath ファイルパス。
+ * @param data 書き込みデータ。
+ */
 function writeJsonFile(filePath: string, data: unknown): void {
   const dir = path.dirname(filePath)
   if (dir && dir !== '.' && !fs.existsSync(dir)) {
@@ -597,6 +751,12 @@ function writeJsonFile(filePath: string, data: unknown): void {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
 }
 
+/**
+ * 前回と今回の差分を計算する。
+ * @param previous 前回の一覧。
+ * @param current 今回の一覧。
+ * @returns 追加/削除の差分。
+ */
 function diffUsers(
   previous: UserSnapshot[] | undefined,
   current: UserSnapshot[],
@@ -616,6 +776,10 @@ function diffUsers(
   return { added, removed }
 }
 
+/**
+ * CycleTLS インスタンスを終了する。
+ * @returns なし。
+ */
 async function cleanup(): Promise<void> {
   if (cycleTLSInstancePromise) {
     try {
@@ -636,6 +800,10 @@ async function cleanup(): Promise<void> {
   }
 }
 
+/**
+ * メイン処理。
+ * @returns なし。
+ */
 async function main(): Promise<void> {
   let exitCode = 0
   try {
@@ -784,6 +952,12 @@ async function main(): Promise<void> {
 
 main()
 
+/**
+ * Discord Webhook に通知する。
+ * @param webhookUrl Webhook URL。
+ * @param payload 通知内容。
+ * @returns なし。
+ */
 async function sendDiscordNotification(
   webhookUrl: string,
   payload: {
@@ -843,6 +1017,11 @@ async function sendDiscordNotification(
   }
 }
 
+/**
+ * Discord 用の Embed を組み立てる。
+ * @param params パラメータ。
+ * @returns Embed オブジェクト。
+ */
 function buildDiscordEmbed(params: {
   title: string
   diff: { added: UserSnapshot[]; removed: UserSnapshot[] }
