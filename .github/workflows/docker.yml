@@ -34,7 +34,7 @@ jobs:
     with:
       targets: >-
         [
-          { imageName: "tomacheese/follow-follower-checker", context: ".", file: "Dockerfile", packageName: "follow-follower-checker" }
+          { imageName: "tomacheese/watch-follow-follower", context: ".", file: "Dockerfile", packageName: "watch-follow-follower" }
         ]
       # registry: registry.hub.docker.com # default: ghcr.io
       # platforms: linux/amd64 # default: linux/amd64,linux/arm64
