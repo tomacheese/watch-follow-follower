@@ -57,7 +57,7 @@ export async function fetchAllUsers(
     if (!nextCursor || nextCursor === cursor || emptyPageStreak >= 2) {
       break
     }
-    if (pageAdded === 0 && nextCursor?.startsWith('0|')) {
+    if (pageAdded === 0 && nextCursor.startsWith('0|')) {
       break
     }
     cursor = nextCursor

@@ -60,7 +60,7 @@ export function loadConfig(): AppConfig {
     throw new Error('Invalid config format')
   }
   const config = parsed as AppConfig
-  if (!config.twitter?.username || !config.twitter?.password) {
+  if (!config.twitter.username || !config.twitter.password) {
     throw new Error('Config is missing twitter.username or twitter.password')
   }
   return config

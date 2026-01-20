@@ -3,11 +3,10 @@ import path from 'node:path'
 
 /**
  * JSON ファイルを読み込む。
- * @typeParam T 返却型。
  * @param filePath ファイルパス。
  * @returns 読み込み結果。失敗時は null。
  */
-export function readJsonFile<T>(filePath: string): T | null {
+export function readJsonFile(filePath: string): unknown | null {
   if (!fs.existsSync(filePath)) {
     return null
   }

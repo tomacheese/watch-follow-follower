@@ -3,7 +3,7 @@ import { TwitterOpenApi } from 'twitter-openapi-typescript'
 import { diffUsers } from './core/diff.js'
 import { normalizeUserSnapshot } from './core/normalize.js'
 import { type DiffFile, type SnapshotFile } from './core/types.js'
-import { fetchAllUsers } from './app/fetchUsers.js'
+import { fetchAllUsers } from './app/fetch-users.js'
 import { cycleTLSFetchWithProxy, cleanupCycleTLS } from './infra/cycletls.js'
 import {
   OUTPUT_DIR,
@@ -27,7 +27,7 @@ async function main(): Promise<void> {
     const discordConfig = getDiscordConfig()
     const targetUsername = getTargetUsername(credentials.username)
 
-    console.log(`Target user: @${targetUsername}`)
+    console.log('Target user resolved.')
 
     const { authToken, ct0 } = await getAuthCookies(credentials)
     TwitterOpenApi.fetchApi = cycleTLSFetchWithProxy
@@ -46,7 +46,7 @@ async function main(): Promise<void> {
       {
         maxRetries: 3,
         baseDelayMs: 2000,
-        operationName: `Resolve user @${targetUsername}`,
+        operationName: 'Resolve user',
       }
     )
 
@@ -77,15 +77,15 @@ async function main(): Promise<void> {
 
     const targetDir = path.join(
       OUTPUT_DIR,
-      targetUsername.replace(/[^a-zA-Z0-9_-]/g, '_')
+      targetUsername.replaceAll(/[^a-zA-Z0-9_-]/g, '_')
     )
 
     const followersPath = path.join(targetDir, 'followers.json')
     const followingPath = path.join(targetDir, 'following.json')
     const diffPath = path.join(targetDir, 'diff.json')
 
-    const previousFollowers = readJsonFile<SnapshotFile>(followersPath)
-    const previousFollowing = readJsonFile<SnapshotFile>(followingPath)
+    const previousFollowers = readJsonFile(followersPath) as SnapshotFile | null
+    const previousFollowing = readJsonFile(followingPath) as SnapshotFile | null
 
     const followersFetchedAt = new Date().toISOString()
     const followingFetchedAt = new Date().toISOString()
@@ -155,7 +155,7 @@ async function main(): Promise<void> {
     }
 
     console.log(
-      `Saved followers (${followers.length}) and following (${following.length}) to ${targetDir}`
+      `Saved followers (${followers.length}) and following (${following.length}).`
     )
   } catch (error) {
     console.error('Fatal error occurred', error)
@@ -164,7 +164,7 @@ async function main(): Promise<void> {
     await cleanupCycleTLS()
   }
 
-  process.exit(exitCode)
+  process.exitCode = exitCode
 }
 
-main()
+void main()
