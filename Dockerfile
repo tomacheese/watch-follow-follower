@@ -3,6 +3,7 @@ FROM node:22-slim
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME/bin:$PATH"
 
+# hadolint ignore=DL3008
 RUN apt-get update && \
   apt-get install -y --no-install-recommends tzdata ca-certificates && \
   cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \

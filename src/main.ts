@@ -47,7 +47,7 @@ async function main(): Promise<void> {
         maxRetries: 3,
         baseDelayMs: 2000,
         operationName: `Resolve user @${targetUsername}`,
-      },
+      }
     )
 
     const targetUser =
@@ -64,7 +64,7 @@ async function main(): Promise<void> {
         userId: targetUserId,
         cursor,
         count: 200,
-      }),
+      })
     )
 
     const following = await fetchAllUsers('Following', (cursor) =>
@@ -72,12 +72,12 @@ async function main(): Promise<void> {
         userId: targetUserId,
         cursor,
         count: 200,
-      }),
+      })
     )
 
     const targetDir = path.join(
       OUTPUT_DIR,
-      targetUsername.replace(/[^a-zA-Z0-9_-]/g, '_'),
+      targetUsername.replace(/[^a-zA-Z0-9_-]/g, '_')
     )
 
     const followersPath = path.join(targetDir, 'followers.json')
@@ -130,10 +130,10 @@ async function main(): Promise<void> {
       writeJsonFile(diffPath, diff)
 
       console.log(
-        `Followers: +${followersDiff.added.length} / -${followersDiff.removed.length}`,
+        `Followers: +${followersDiff.added.length} / -${followersDiff.removed.length}`
       )
       console.log(
-        `Following: +${followingDiff.added.length} / -${followingDiff.removed.length}`,
+        `Following: +${followingDiff.added.length} / -${followingDiff.removed.length}`
       )
 
       const totalChanges =
@@ -155,7 +155,7 @@ async function main(): Promise<void> {
     }
 
     console.log(
-      `Saved followers (${followers.length}) and following (${following.length}) to ${targetDir}`,
+      `Saved followers (${followers.length}) and following (${following.length}) to ${targetDir}`
     )
   } catch (error) {
     console.error('Fatal error occurred', error)

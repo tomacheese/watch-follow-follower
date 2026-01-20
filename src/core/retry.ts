@@ -12,7 +12,7 @@ export async function withRetry<T>(
     baseDelayMs?: number
     maxDelayMs?: number
     operationName?: string
-  } = {},
+  } = {}
 ): Promise<T> {
   const {
     maxRetries = 3,
@@ -30,15 +30,16 @@ export async function withRetry<T>(
       }
       const rateLimitDelay = getRateLimitDelayMs(error)
       const delay =
-        rateLimitDelay ?? Math.min(baseDelayMs * Math.pow(2, attempt - 1), maxDelayMs)
+        rateLimitDelay ??
+        Math.min(baseDelayMs * Math.pow(2, attempt - 1), maxDelayMs)
       const delaySeconds = Math.ceil(delay / 1000)
       if (rateLimitDelay) {
         console.warn(
-          `${operationName} hit rate limit, retrying in ${delaySeconds}s...`,
+          `${operationName} hit rate limit, retrying in ${delaySeconds}s...`
         )
       } else {
         console.warn(
-          `${operationName} failed (attempt ${attempt}/${maxRetries}), retrying in ${delaySeconds}s...`,
+          `${operationName} failed (attempt ${attempt}/${maxRetries}), retrying in ${delaySeconds}s...`
         )
       }
       await new Promise((resolve) => setTimeout(resolve, delay))
@@ -69,7 +70,7 @@ export function getRateLimitDelayMs(error: unknown): number | null {
       const waitMs = Math.max(resetMs - now, 1000)
       const resetTime = new Date(resetMs).toISOString()
       console.warn(
-        `Rate limit hit (remaining ${remaining ?? 'unknown'}/${limit ?? 'unknown'}). Reset at ${resetTime}.`,
+        `Rate limit hit (remaining ${remaining ?? 'unknown'}/${limit ?? 'unknown'}). Reset at ${resetTime}.`
       )
       return waitMs + 2000
     }

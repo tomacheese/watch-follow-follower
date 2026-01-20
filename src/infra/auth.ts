@@ -96,7 +96,7 @@ async function loginWithRetry(
   password: string,
   email?: string,
   twoFactorSecret?: string,
-  maxRetries = 5,
+  maxRetries = 5
 ): Promise<void> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -126,7 +126,7 @@ async function loginWithRetry(
  * @returns auth_token と ct0。
  */
 export async function getAuthCookies(
-  credentials: Credentials,
+  credentials: Credentials
 ): Promise<{ authToken: string; ct0: string }> {
   const cached = loadCachedCookies()
   if (cached) {
@@ -144,7 +144,7 @@ export async function getAuthCookies(
     credentials.username,
     credentials.password,
     credentials.emailAddress,
-    credentials.twoFactorSecret,
+    credentials.twoFactorSecret
   )
 
   if (!(await scraper.isLoggedIn())) {

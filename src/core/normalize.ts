@@ -42,7 +42,7 @@ export function normalizeUserSnapshot(data: unknown): UserSnapshot | null {
     verified: Boolean(legacy?.verified),
     isBlueVerified: Boolean(
       (user.isBlueVerified as boolean | undefined) ??
-        (user.is_blue_verified as boolean | undefined),
+      (user.is_blue_verified as boolean | undefined)
     ),
     protected: Boolean(legacy?.protected),
   }

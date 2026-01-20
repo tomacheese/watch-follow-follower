@@ -13,7 +13,7 @@ export async function sendDiscordNotification(
     checkedAt: string
     followers: { added: UserSnapshot[]; removed: UserSnapshot[] }
     following: { added: UserSnapshot[]; removed: UserSnapshot[] }
-  },
+  }
 ): Promise<void> {
   const followerChanges =
     payload.followers.added.length + payload.followers.removed.length
@@ -29,7 +29,7 @@ export async function sendDiscordNotification(
         diff: payload.followers,
         targetUsername: payload.targetUsername,
         checkedAt: payload.checkedAt,
-      }),
+      })
     )
   }
 
@@ -40,7 +40,7 @@ export async function sendDiscordNotification(
         diff: payload.following,
         targetUsername: payload.targetUsername,
         checkedAt: payload.checkedAt,
-      }),
+      })
     )
   }
 
@@ -60,7 +60,7 @@ export async function sendDiscordNotification(
   if (!response.ok) {
     const text = await response.text().catch(() => '')
     console.warn(
-      `Discord webhook failed: ${response.status} ${response.statusText} ${text}`.trim(),
+      `Discord webhook failed: ${response.status} ${response.statusText} ${text}`.trim()
     )
   }
 }

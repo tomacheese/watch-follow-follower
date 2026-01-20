@@ -12,7 +12,7 @@ export async function fetchAllUsers(
   label: string,
   fetchPage: (cursor?: string) => Promise<{
     data: { data: unknown[]; cursor: { bottom?: { value?: string } } }
-  }>,
+  }>
 ): Promise<UserSnapshot[]> {
   const users: UserSnapshot[] = []
   const seen = new Set<string>()
@@ -22,7 +22,7 @@ export async function fetchAllUsers(
   while (true) {
     page += 1
     console.log(
-      `${label} page ${page} fetching...${cursor ? ` cursor=${cursor}` : ''}`,
+      `${label} page ${page} fetching...${cursor ? ` cursor=${cursor}` : ''}`
     )
     const response = await withRetry(() => fetchPage(cursor), {
       maxRetries: 5,
@@ -46,7 +46,7 @@ export async function fetchAllUsers(
 
     const nextCursor = response.data.cursor.bottom?.value
     console.log(
-      `${label} page ${page} fetched: +${pageAdded} (total ${users.length})`,
+      `${label} page ${page} fetched: +${pageAdded} (total ${users.length})`
     )
     if (pageAdded === 0) {
       emptyPageStreak += 1

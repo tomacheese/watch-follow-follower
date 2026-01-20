@@ -13,6 +13,9 @@ on:
       - master
   merge_group:
 
+permissions:
+  contents: read
+
 jobs:
   node-ci:
     name: Node CI

@@ -9,14 +9,14 @@ import { sortUsers } from './normalize.js'
  */
 export function diffUsers(
   previous: UserSnapshot[] | undefined,
-  current: UserSnapshot[],
+  current: UserSnapshot[]
 ): { added: UserSnapshot[]; removed: UserSnapshot[] } {
   const prevMap = new Map((previous ?? []).map((user) => [user.id, user]))
   const currMap = new Map(current.map((user) => [user.id, user]))
 
   const added = sortUsers(current.filter((user) => !prevMap.has(user.id)))
   const removed = sortUsers(
-    (previous ?? []).filter((user) => !currMap.has(user.id)),
+    (previous ?? []).filter((user) => !currMap.has(user.id))
   )
 
   return { added, removed }

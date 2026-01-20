@@ -12,6 +12,9 @@ on:
       - main
       - master
 
+permissions:
+  contents: read
+
 jobs:
   node-ci:
     name: Node CI
