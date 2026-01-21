@@ -2,7 +2,7 @@
 
 while :
 do
-  node index.js || true
+  pnpm start || true
 
   # wait 30 minutes
   sleep 1800

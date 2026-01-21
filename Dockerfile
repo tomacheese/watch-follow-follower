@@ -28,3 +28,4 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 ENV NODE_ENV=production
 
 ENTRYPOINT [ "pnpm", "start" ]
+
