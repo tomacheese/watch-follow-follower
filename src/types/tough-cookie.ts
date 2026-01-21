@@ -1,1 +1,1 @@
-import type {} from 'tough-cookie';
+import type {} from 'tough-cookie'
