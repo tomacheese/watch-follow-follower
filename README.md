@@ -10,7 +10,7 @@ Version 3 of a lightweight checker that captures X (Twitter) follower/following 
 - Optional proxy support
 
 ## Requirements
-- Node.js (22 LTS recommended)
+- Node.js (see .node-version for the current version)
 - pnpm
 
 ## Setup
@@ -32,6 +32,7 @@ cp config.sample.json data/config.json
 2) Edit `data/config.json` with your credentials.
 
 The default config path is `./data/config.json`. You can override it with `CONFIG_PATH`.
+The Docker image sets `CONFIG_PATH`, `OUTPUT_DIR`, and `COOKIE_CACHE_PATH` to `/data/...`, so mount the host `./data` directory to `/data`.
 
 ### Run
 
@@ -73,7 +74,7 @@ Build and run (config file):
 ```bash
 docker build -t watch-follow-follower .
 docker run --rm \
-  -v $(pwd)/data:/app/data \
+  -v $(pwd)/data:/data \
   watch-follow-follower
 ```
 
@@ -84,8 +85,17 @@ docker run --rm \
   -e TWITTER_USERNAME=... \
   -e TWITTER_PASSWORD=... \
   -e TWITTER_EMAIL_ADDRESS=... \
-  -v $(pwd)/data:/app/data \
+  -v $(pwd)/data:/data \
   watch-follow-follower
+```
+
+The Docker image runs `pnpm start` every 30 minutes via `entrypoint.sh`.
+
+### Docker Compose
+If you prefer Docker Compose, ensure `data/config.json` exists and run:
+
+```bash
+docker compose up --build
 ```
 
 ## Notes

@@ -22,10 +22,14 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch
 
 COPY package.json tsconfig.json .npmrc ./
 COPY src src
+COPY entrypoint.sh ./
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline
+RUN chmod +x entrypoint.sh
 
 ENV NODE_ENV=production
+ENV CONFIG_PATH=/data/config.json
+ENV OUTPUT_DIR=/data
+ENV COOKIE_CACHE_PATH=/data/twitter-cookies.json
 
-ENTRYPOINT [ "pnpm", "start" ]
-
+ENTRYPOINT [ "/app/entrypoint.sh" ]
