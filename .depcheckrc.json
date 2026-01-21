@@ -1,8 +1,12 @@
 {
   "ignoreMatches": [
+    "@types/tough-cookie",
     "@typescript-eslint/eslint-plugin",
     "@typescript-eslint/parser",
     "eslint-config-prettier",
+    "eslint-plugin-import",
+    "eslint-plugin-n",
+    "eslint-plugin-promise",
     "eslint-plugin-unicorn"
   ],
   "ignorePatterns": [
