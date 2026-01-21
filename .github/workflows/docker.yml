@@ -28,6 +28,7 @@ permissions:
   contents: write
   packages: write
   deployments: write
+  actions: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.merged == true && github.base_ref || github.event.pull_request.head.sha }}
