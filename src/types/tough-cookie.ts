@@ -1,1 +1,3 @@
-import type {} from 'tough-cookie'
+import type { CookieJar } from 'tough-cookie'
+
+export type ToughCookieCookieJar = CookieJar
