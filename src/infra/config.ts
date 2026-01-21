@@ -25,6 +25,24 @@ export interface AppConfig {
 }
 
 /**
+ * JSON から読み込む設定の生データ。
+ */
+export interface AppConfigSource {
+  twitter?: {
+    /** ログイン用ユーザー名（スクリーンネーム）。 */
+    username?: string
+    /** ログイン用パスワード。 */
+    password?: string
+    /** ログイン用メールアドレス（任意）。 */
+    emailAddress?: string
+  }
+  discord?: {
+    /** Discord Webhook URL。 */
+    webhookUrl?: string
+  }
+}
+
+/**
  * 環境変数や設定ファイルから解決した認証情報。
  */
 export interface Credentials {
@@ -48,9 +66,9 @@ export interface DiscordConfig {
 
 /**
  * 設定ファイルを読み込む。
- * @returns 設定内容。
+ * @returns 設定内容（未検証の生データ）。
  */
-export function loadConfig(): AppConfig {
+export function loadConfigSource(): AppConfigSource {
   if (!fs.existsSync(CONFIG_PATH)) {
     throw new Error(`Config file not found: ${CONFIG_PATH}`)
   }
@@ -59,11 +77,22 @@ export function loadConfig(): AppConfig {
   if (typeof parsed !== 'object' || parsed === null) {
     throw new Error('Invalid config format')
   }
-  const config = parsed as AppConfig
+  return parsed as AppConfigSource
+}
+
+/**
+ * 設定ファイルを読み込む。
+ * @returns 設定内容。
+ */
+export function loadConfig(): AppConfig {
+  const config = loadConfigSource()
+  if (!config.twitter || typeof config.twitter !== 'object') {
+    throw new Error('Config is missing twitter section')
+  }
   if (!config.twitter.username || !config.twitter.password) {
     throw new Error('Config is missing twitter.username or twitter.password')
   }
-  return config
+  return config as AppConfig
 }
 
 /**
@@ -107,7 +136,7 @@ export function getDiscordConfig(): DiscordConfig | null {
   if (!fs.existsSync(CONFIG_PATH)) {
     return null
   }
-  const config = loadConfig()
+  const config = loadConfigSource()
   return config.discord ?? null
 }
 
