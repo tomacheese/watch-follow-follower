@@ -1,197 +1,173 @@
-import { loadConfig, PATH } from './config'
-import { Logger } from './logger'
-import { TwApi } from './twitter'
-import { IUserData, UsersManager } from './users-manager'
-import { sendDiscordMessage, sliceArray } from './utils'
+import path from 'node:path'
+import { TwitterOpenApi } from 'twitter-openapi-typescript'
+import { diffUsers } from './core/diff.js'
+import { normalizeUserSnapshot } from './core/normalize.js'
+import { type DiffFile, type SnapshotFile } from './core/types.js'
+import { fetchAllUsers } from './app/fetch-users.js'
+import { cycleTLSFetchWithProxy, cleanupCycleTLS } from './infra/cycletls.js'
+import {
+  OUTPUT_DIR,
+  getCredentials,
+  getDiscordConfig,
+  getTargetUsername,
+} from './infra/config.js'
+import { readJsonFile, writeJsonFile } from './infra/fs.js'
+import { getAuthCookies } from './infra/auth.js'
+import { withRetry } from './core/retry.js'
+import { sendDiscordNotification } from './presentation/discord.js'
 
-interface IUserStatusCodes {
-  [key: string]: number | undefined
-}
+/**
+ * メイン処理。
+ * @returns なし。
+ */
+async function main(): Promise<void> {
+  let exitCode = 0
+  try {
+    const credentials = getCredentials()
+    const discordConfig = getDiscordConfig()
+    const targetUsername = getTargetUsername(credentials.username)
 
-async function getUserData(twApi: TwApi, manager: UsersManager, ids: string[]) {
-  // キャッシュに存在するユーザーのデータを取得
-  // キャッシュに存在しない場合は getTwitterUsersData メソッドで取得
-  const users: IUserData[] = [] // ユーザーのデータを格納する配列
-  const notCachedIds = [] // キャッシュに存在しないユーザーの ID を格納する配列
-  for (const id of ids) {
-    const user = manager.getUserData(id)
-    if (user) {
-      users.push(user)
+    console.log('Target user resolved.')
+
+    const { authToken, ct0 } = await getAuthCookies(credentials)
+    TwitterOpenApi.fetchApi = cycleTLSFetchWithProxy
+
+    const api = new TwitterOpenApi()
+    const client = await api.getClientFromCookies({
+      auth_token: authToken,
+      ct0,
+    })
+
+    const targetResponse = await withRetry(
+      () =>
+        client.getUserApi().getUserByScreenName({
+          screenName: targetUsername,
+        }),
+      {
+        maxRetries: 3,
+        baseDelayMs: 2000,
+        operationName: 'Resolve user',
+      }
+    )
+
+    const targetUser =
+      normalizeUserSnapshot(targetResponse.data) ??
+      normalizeUserSnapshot({ user: targetResponse.data.user })
+    if (!targetUser) {
+      throw new Error(`Failed to resolve user: ${targetUsername}`)
+    }
+
+    const targetUserId = targetUser.id
+
+    const followers = await fetchAllUsers('Followers', (cursor) =>
+      client.getUserListApi().getFollowers({
+        userId: targetUserId,
+        cursor,
+        count: 200,
+      })
+    )
+
+    const following = await fetchAllUsers('Following', (cursor) =>
+      client.getUserListApi().getFollowing({
+        userId: targetUserId,
+        cursor,
+        count: 200,
+      })
+    )
+
+    const targetDir = path.join(
+      OUTPUT_DIR,
+      targetUsername.replaceAll(/[^a-zA-Z0-9_-]/g, '_')
+    )
+
+    const followersPath = path.join(targetDir, 'followers.json')
+    const followingPath = path.join(targetDir, 'following.json')
+    const diffPath = path.join(targetDir, 'diff.json')
+
+    const previousFollowers = readJsonFile(followersPath) as SnapshotFile | null
+    const previousFollowing = readJsonFile(followingPath) as SnapshotFile | null
+
+    const followersFetchedAt = new Date().toISOString()
+    const followingFetchedAt = new Date().toISOString()
+
+    const followersSnapshot: SnapshotFile = {
+      targetUsername,
+      targetUserId,
+      fetchedAt: followersFetchedAt,
+      users: followers,
+    }
+
+    const followingSnapshot: SnapshotFile = {
+      targetUsername,
+      targetUserId,
+      fetchedAt: followingFetchedAt,
+      users: following,
+    }
+
+    writeJsonFile(followersPath, followersSnapshot)
+    writeJsonFile(followingPath, followingSnapshot)
+
+    if (previousFollowers || previousFollowing) {
+      const followersDiff = diffUsers(previousFollowers?.users, followers)
+      const followingDiff = diffUsers(previousFollowing?.users, following)
+
+      const diff: DiffFile = {
+        targetUsername,
+        targetUserId,
+        generatedAt: new Date().toISOString(),
+        previousFetchedAt: {
+          followers: previousFollowers?.fetchedAt ?? null,
+          following: previousFollowing?.fetchedAt ?? null,
+        },
+        currentFetchedAt: {
+          followers: followersFetchedAt,
+          following: followingFetchedAt,
+        },
+        followers: followersDiff,
+        following: followingDiff,
+      }
+
+      writeJsonFile(diffPath, diff)
+
+      console.log(
+        `Followers: +${followersDiff.added.length} / -${followersDiff.removed.length}`
+      )
+      console.log(
+        `Following: +${followingDiff.added.length} / -${followingDiff.removed.length}`
+      )
+
+      const totalChanges =
+        followersDiff.added.length +
+        followersDiff.removed.length +
+        followingDiff.added.length +
+        followingDiff.removed.length
+
+      if (totalChanges > 0 && discordConfig?.webhookUrl) {
+        await sendDiscordNotification(discordConfig.webhookUrl, {
+          targetUsername,
+          checkedAt: new Date().toISOString(),
+          followers: followersDiff,
+          following: followingDiff,
+        })
+      }
     } else {
-      notCachedIds.push(id)
+      console.log('Snapshot saved. No previous data to diff.')
     }
-  }
 
-  // users/lookup は 100 件までしか取得できないので、100 件ごとに分割して取得
-  const slicedIds = sliceArray(notCachedIds, 100)
-  for (const ids of slicedIds) {
-    const newUsers = await twApi.getUsersById(ids)
-    users.push(
-      ...newUsers.map((user) => ({
-        user_id: user.id_str,
-        name: user.name,
-        screen_name: user.screen_name,
-      })),
+    console.log(
+      `Saved followers (${followers.length}) and following (${following.length}).`
     )
-    for (const user of newUsers.map((user) => ({
-      user_id: user.id_str,
-      name: user.name,
-      screen_name: user.screen_name,
-    }))) {
-      manager.setUserData(user)
-    }
+  } catch {
+    console.error('Fatal error occurred')
+    exitCode = 1
+  } finally {
+    await cleanupCycleTLS()
   }
 
-  return users
+  process.exitCode = exitCode
 }
 
-async function checkFollow(
-  manager: UsersManager,
-  twApi: TwApi,
-  type: 'follow' | 'follower',
-): Promise<{ newIds: string[]; removedIds: string[] }> {
-  const getPreviousIdsMethod =
-    type === 'follow'
-      ? manager.getFollowIds.bind(manager)
-      : manager.getFollowerIds.bind(manager)
-  const getIdsMethod =
-    type === 'follow'
-      ? twApi.getFollowingIds.bind(twApi)
-      : twApi.getFollowersIds.bind(twApi)
-  const setIdsMethod =
-    type === 'follow'
-      ? manager.setFollowIds.bind(manager)
-      : manager.setFollowerIds.bind(manager)
-
-  /** 前回フォローしていた/フォロワーだったユーザーの ID */
-  const previousIds = getPreviousIdsMethod()
-  /** 現在フォローしている/フォロワーなユーザーの ID */
-  const nowIds = await getIdsMethod()
-
-  /** 新しくフォローした/フォロワーのユーザー ID */
-  const newIds = nowIds.filter((id) => !previousIds.includes(id))
-  /** フォローを外した/フォロワーではなくなったユーザーの ID */
-  const removedIds = previousIds.filter((id) => !nowIds.includes(id))
-
-  // 次回のチェックのためにフォローしている/フォロワーなユーザーの ID を保存
-  setIdsMethod(nowIds)
-
-  return {
-    newIds,
-    removedIds,
-  }
-}
-
-function formatUser(
-  userDataes: IUserData[],
-  userStatusCodes: IUserStatusCodes,
-  userId: string,
-) {
-  const userData = userDataes.find((data) => data.user_id === userId)
-  const userStatusCode = userStatusCodes[userId] || 'NULL'
-  if (!userData) {
-    return `*?* *@?* (${userStatusCode} https://twitter.com/i/user/${userId}`
-  }
-  return `\`${userData.name}\` \`@${userData.screen_name}\` (${userStatusCode}) https://twitter.com/i/user/${userId}`
-}
-
-async function main() {
-  const logger = Logger.configure('main')
-  logger.info('✨ main()')
-
-  const config = loadConfig()
-  const twApi = new TwApi(config)
-  const manager = new UsersManager(PATH.USERS_FILE)
-
-  const isFirstLoad = manager.isFirstLoad
-
-  const { newIds: newFollowIds, removedIds: removedFollowIds } =
-    await checkFollow(manager, twApi, 'follow')
-  const { newIds: newFollowerIds, removedIds: removedFollowerIds } =
-    await checkFollow(manager, twApi, 'follower')
-  logger.info(
-    `🆕 New following: ${newFollowIds.length} / New follower: ${newFollowerIds.length}`,
-  )
-  logger.info(
-    `👋 Unfollowing: ${removedFollowIds.length} / Unfollower: ${removedFollowerIds.length}`,
-  )
-
-  // ユーザーデータを取得
-  const userDataes = await Promise.all([
-    getUserData(twApi, manager, newFollowIds),
-    getUserData(twApi, manager, newFollowerIds),
-    getUserData(twApi, manager, removedFollowIds),
-    getUserData(twApi, manager, removedFollowerIds),
-  ]).then((data) => data.flat())
-
-  // 通知する
-  if (isFirstLoad) {
-    // 初回実行時は通知しない
-    logger.info('💚 First running... saved! Skip notification.')
-    return
-  }
-
-  // 通知するユーザーのステータスコードを取得
-  const userStatusCodes: IUserStatusCodes = {}
-  for (const id of new Set([
-    ...newFollowIds,
-    ...newFollowerIds,
-    ...removedFollowIds,
-    ...removedFollowerIds,
-  ])) {
-    // userStatusCodes[id] = await getTwitterUserStatusCode(twitterApi, id)
-    userStatusCodes[id] = -1 // TODO
-  }
-
-  // 通知する : フォローした
-  const newFollowUsers = newFollowIds.map((id) =>
-    formatUser(userDataes, userStatusCodes, id),
-  )
-  if (newFollowUsers.length > 0) {
-    logger.info(`📣 Notification: New follow users`)
-    sendDiscordMessage(
-      config.discord.follow,
-      `:new: **New follow users**\n` + newFollowUsers.join('\n'),
-    )
-  }
-
-  // 通知する : フォロー解除した
-  const removedFollowUsers = removedFollowIds.map((id) =>
-    formatUser(userDataes, userStatusCodes, id),
-  )
-  if (removedFollowUsers.length > 0) {
-    logger.info(`📣 Notification: Unfollow users`)
-    sendDiscordMessage(
-      config.discord.follow,
-      `:wave: **Unfollow users**\n` + removedFollowUsers.join('\n'),
-    )
-  }
-
-  // 通知する : フォロワーになった
-  const newFollowerUsers = newFollowerIds.map((id) =>
-    formatUser(userDataes, userStatusCodes, id),
-  )
-  if (newFollowerUsers.length > 0) {
-    logger.info(`📣 Notification: New follower users`)
-    sendDiscordMessage(
-      config.discord.follower,
-      `:new: **New follower users**\n` + newFollowerUsers.join('\n'),
-    )
-  }
-
-  // 通知する : フォロワーではなくなった
-  const removedFollowerUsers = removedFollowerIds.map((id) =>
-    formatUser(userDataes, userStatusCodes, id),
-  )
-  if (removedFollowerUsers.length > 0) {
-    logger.info(`📣 Notification: Unfollower users`)
-    sendDiscordMessage(
-      config.discord.follower,
-      `:wave: **Unfollower users**\n` + removedFollowerUsers.join('\n'),
-    )
-  }
-}
-
-;(async () => {
-  await main()
-})()
+main().catch(() => {
+  console.error('Fatal error occurred')
+  process.exitCode = 1
+})

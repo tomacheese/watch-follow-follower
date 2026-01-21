@@ -1,41 +1,30 @@
-FROM node:21-alpine as builder
+FROM node:22-slim
 
-WORKDIR /app
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME/bin:$PATH"
 
-COPY package.json .
-COPY yarn.lock .
-
-RUN echo network-timeout 600000 > .yarnrc && \
-  yarn install --frozen-lockfile && \
-  yarn cache clean
-
-COPY src src
-COPY tsconfig.json .
-
-RUN yarn package
-
-FROM node:21-alpine as runner
-
-# hadolint ignore=DL3018
-RUN apk update && \
-  apk upgrade && \
-  apk add --update --no-cache tzdata && \
+# hadolint ignore=DL3008
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends tzdata ca-certificates && \
   cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
   echo "Asia/Tokyo" > /etc/timezone && \
-  apk del tzdata
+  rm -rf /var/lib/apt/lists/* && \
+  npm install -g corepack@latest && \
+  corepack enable
 
 WORKDIR /app
 
-COPY --from=builder /app/output .
+RUN pnpm config set node-linker hoisted
+
+COPY pnpm-lock.yaml ./
+
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch
+
+COPY package.json tsconfig.json .npmrc ./
+COPY src src
+
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline
 
 ENV NODE_ENV=production
-ENV CONFIG_FILE=/data/config.json
-ENV USERS_FILE=/data/users.json
-ENV LOG_DIR /data/logs
 
-COPY entrypoint.sh .
-RUN chmod +x entrypoint.sh
-
-VOLUME [ "/data" ]
-
-ENTRYPOINT [ "/app/entrypoint.sh" ]
+ENTRYPOINT [ "pnpm", "start" ]

@@ -22,9 +22,14 @@ on:
       - synchronize
       - reopened
       - closed
+  merge_group:
+
+permissions:
+  contents: read
+  packages: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.merged == true && 'master' || github.event.pull_request.head.sha }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.merged == true && github.base_ref || github.event.pull_request.head.sha }}
 
 jobs:
   docker-ci:
@@ -35,6 +40,9 @@ jobs:
         [
           { imageName: "tomacheese/watch-follow-follower", context: ".", file: "Dockerfile", packageName: "watch-follow-follower" }
         ]
+      # registry: registry.hub.docker.com # default: ghcr.io
+      # platforms: linux/amd64 # default: linux/amd64,linux/arm64
     secrets:
       DOCKER_USERNAME: ${{ github.actor }}
       DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
