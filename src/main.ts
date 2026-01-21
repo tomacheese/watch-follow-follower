@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import path from 'node:path'
 import { TwitterOpenApi } from 'twitter-openapi-typescript'
 import { diffUsers } from './core/diff.js'
@@ -17,23 +18,43 @@ import { withRetry } from './core/retry.js'
 import { sendDiscordNotification } from './presentation/discord.js'
 
 /**
- * 致命的なエラーの詳細を出力する。
+ * エラー内容を文字列化する。
+ * @param error - 例外情報。
+ * @returns エラー内容の文字列。
+ */
+function formatErrorDetails(error: unknown): string {
+  if (error instanceof Error) {
+    if (error.stack) {
+      return error.stack
+    }
+    return `${error.name}: ${error.message}`
+  }
+
+  try {
+    return JSON.stringify(error, null, 2)
+  } catch {
+    return String(error)
+  }
+}
+
+/**
+ * 致命的なエラーの詳細をファイルに出力する。
  * @param error - 例外情報。
  */
 function logFatalError(error: unknown): void {
-  console.error('Fatal error occurred')
+  const errorDetails = formatErrorDetails(error)
+  const timestamp = new Date().toISOString().replaceAll(':', '-')
+  const logDir = path.join(OUTPUT_DIR, 'logs')
+  const logPath = path.join(logDir, `fatal-error-${timestamp}.log`)
 
-  if (error instanceof Error) {
-    if (error.stack) {
-      console.error(error.stack)
-      return
-    }
-
-    console.error(`${error.name}: ${error.message}`)
-    return
+  try {
+    fs.mkdirSync(logDir, { recursive: true })
+    fs.writeFileSync(logPath, errorDetails, 'utf8')
+    console.error(`Fatal error occurred. Details saved to ${logPath}`)
+  } catch {
+    console.error('Fatal error occurred')
+    console.error('Failed to write error log.')
   }
-
-  console.error(error)
 }
 
 /**
