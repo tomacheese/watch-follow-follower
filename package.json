@@ -11,14 +11,12 @@
     "@the-convocation/twitter-scraper": "0.21.1",
     "cycletls": "2.0.5",
     "headers-polyfill": "4.0.3",
-    "twitter-openapi-typescript": "0.0.55",
-    "tsx": "4.21.0"
+    "tsx": "4.21.0",
+    "twitter-openapi-typescript": "0.0.55"
   },
   "devDependencies": {
     "@book000/eslint-config": "1.12.38",
-    "@book000/node-utils": "1.24.31",
     "@types/node": "25.0.9",
-    "@types/tough-cookie": "4.0.5",
     "eslint": "9.39.2",
     "eslint-config-standard": "17.1.0",
     "eslint-plugin-import": "2.32.0",

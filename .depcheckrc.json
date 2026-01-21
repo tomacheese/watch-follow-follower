@@ -1,10 +1,11 @@
 {
-  "ignores": [
-    "@types/node",
-    "run-z",
-    "eslint-config-standard",
-    "eslint-plugin-import",
-    "eslint-plugin-n",
-    "eslint-plugin-promise"
+  "ignoreMatches": [
+    "@typescript-eslint/eslint-plugin",
+    "@typescript-eslint/parser",
+    "eslint-config-prettier",
+    "eslint-plugin-unicorn"
+  ],
+  "ignorePatterns": [
+    ".eslintrc.yml"
   ]
 }
