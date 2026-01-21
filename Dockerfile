@@ -22,10 +22,11 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch
 
 COPY package.json tsconfig.json .npmrc ./
 COPY src src
+COPY entrypoint.sh ./
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline
+RUN chmod +x entrypoint.sh
 
 ENV NODE_ENV=production
 
-ENTRYPOINT [ "pnpm", "start" ]
-
+ENTRYPOINT [ "/app/entrypoint.sh" ]

@@ -88,6 +88,8 @@ docker run --rm \
   watch-follow-follower
 ```
 
+The Docker image runs `pnpm start` every 30 minutes via `entrypoint.sh`.
+
 ### Docker Compose
 If you prefer Docker Compose, ensure `data/config.json` exists and run:
 
