@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import path from 'node:path'
 import { TwitterOpenApi } from 'twitter-openapi-typescript'
 import { diffUsers } from './core/diff.js'
@@ -15,6 +16,46 @@ import { readJsonFile, writeJsonFile } from './infra/fs.js'
 import { getAuthCookies } from './infra/auth.js'
 import { withRetry } from './core/retry.js'
 import { sendDiscordNotification } from './presentation/discord.js'
+
+/**
+ * エラー内容を文字列化する。
+ * @param error - 例外情報。
+ * @returns エラー内容の文字列。
+ */
+function formatErrorDetails(error: unknown): string {
+  if (error instanceof Error) {
+    if (error.stack) {
+      return error.stack
+    }
+    return `${error.name}: ${error.message}`
+  }
+
+  try {
+    return JSON.stringify(error, null, 2)
+  } catch {
+    return String(error)
+  }
+}
+
+/**
+ * 致命的なエラーの詳細をファイルに出力する。
+ * @param error - 例外情報。
+ */
+function logFatalError(error: unknown): void {
+  const errorDetails = formatErrorDetails(error)
+  const timestamp = new Date().toISOString().replaceAll(':', '-')
+  const logDir = path.join(OUTPUT_DIR, 'logs')
+  const logPath = path.join(logDir, `fatal-error-${timestamp}.log`)
+
+  try {
+    fs.mkdirSync(logDir, { recursive: true })
+    fs.writeFileSync(logPath, errorDetails, 'utf8')
+    console.error(`Fatal error occurred. Details saved to ${logPath}`)
+  } catch {
+    console.error('Fatal error occurred')
+    console.error('Failed to write error log.')
+  }
+}
 
 /**
  * メイン処理。
@@ -157,8 +198,8 @@ async function main(): Promise<void> {
     console.log(
       `Saved followers (${followers.length}) and following (${following.length}).`
     )
-  } catch {
-    console.error('Fatal error occurred')
+  } catch (error) {
+    logFatalError(error)
     exitCode = 1
   } finally {
     await cleanupCycleTLS()
@@ -167,7 +208,7 @@ async function main(): Promise<void> {
   process.exitCode = exitCode
 }
 
-main().catch(() => {
-  console.error('Fatal error occurred')
+main().catch((error: unknown) => {
+  logFatalError(error)
   process.exitCode = 1
 })
