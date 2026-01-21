@@ -6,6 +6,5 @@ services:
     volumes:
       - type: bind
         source: ./data
-        target: /data
+        target: /app/data
     init: true
-    restart: always

@@ -10,7 +10,7 @@ Version 3 of a lightweight checker that captures X (Twitter) follower/following 
 - Optional proxy support
 
 ## Requirements
-- Node.js (22 LTS recommended)
+- Node.js (see .node-version for the current version)
 - pnpm
 
 ## Setup
@@ -86,6 +86,13 @@ docker run --rm \
   -e TWITTER_EMAIL_ADDRESS=... \
   -v $(pwd)/data:/app/data \
   watch-follow-follower
+```
+
+### Docker Compose
+If you prefer Docker Compose, ensure `data/config.json` exists and run:
+
+```bash
+docker compose up --build
 ```
 
 ## Notes
