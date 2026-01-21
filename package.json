@@ -46,5 +46,20 @@
     "lint:tsc": "tsc",
     "preinstall": "npx only-allow pnpm",
     "start": "tsx ./src/main.ts"
+  },
+  "depcheck": {
+    "ignoreMatches": [
+      "@types/tough-cookie",
+      "@typescript-eslint/eslint-plugin",
+      "@typescript-eslint/parser",
+      "eslint-config-prettier",
+      "eslint-plugin-import",
+      "eslint-plugin-n",
+      "eslint-plugin-promise",
+      "eslint-plugin-unicorn"
+    ],
+    "ignorePatterns": [
+      ".eslintrc.yml"
+    ]
   }
 }
