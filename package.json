@@ -17,6 +17,7 @@
   "devDependencies": {
     "@book000/eslint-config": "1.12.38",
     "@types/node": "25.0.9",
+    "@types/tough-cookie": "^4.0.5",
     "eslint": "9.39.2",
     "eslint-config-standard": "17.1.0",
     "eslint-plugin-import": "2.32.0",
