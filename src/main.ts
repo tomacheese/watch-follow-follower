@@ -17,6 +17,26 @@ import { withRetry } from './core/retry.js'
 import { sendDiscordNotification } from './presentation/discord.js'
 
 /**
+ * 致命的なエラーの詳細を出力する。
+ * @param error - 例外情報。
+ */
+function logFatalError(error: unknown): void {
+  console.error('Fatal error occurred')
+
+  if (error instanceof Error) {
+    if (error.stack) {
+      console.error(error.stack)
+      return
+    }
+
+    console.error(`${error.name}: ${error.message}`)
+    return
+  }
+
+  console.error(error)
+}
+
+/**
  * メイン処理。
  * @returns なし。
  */
@@ -157,8 +177,8 @@ async function main(): Promise<void> {
     console.log(
       `Saved followers (${followers.length}) and following (${following.length}).`
     )
-  } catch {
-    console.error('Fatal error occurred')
+  } catch (error) {
+    logFatalError(error)
     exitCode = 1
   } finally {
     await cleanupCycleTLS()
@@ -167,7 +187,7 @@ async function main(): Promise<void> {
   process.exitCode = exitCode
 }
 
-main().catch(() => {
-  console.error('Fatal error occurred')
+main().catch((error: unknown) => {
+  logFatalError(error)
   process.exitCode = 1
 })
