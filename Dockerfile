@@ -28,5 +28,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN chmod +x entrypoint.sh
 
 ENV NODE_ENV=production
+ENV CONFIG_PATH=/data/config.json
+ENV OUTPUT_DIR=/data
+ENV COOKIE_CACHE_PATH=/data/twitter-cookies.json
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]

@@ -6,5 +6,5 @@ services:
     volumes:
       - type: bind
         source: ./data
-        target: /app/data
+        target: /data
     init: true

@@ -32,6 +32,7 @@ cp config.sample.json data/config.json
 2) Edit `data/config.json` with your credentials.
 
 The default config path is `./data/config.json`. You can override it with `CONFIG_PATH`.
+The Docker image sets `CONFIG_PATH`, `OUTPUT_DIR`, and `COOKIE_CACHE_PATH` to `/data/...`, so mount the host `./data` directory to `/data`.
 
 ### Run
 
@@ -73,7 +74,7 @@ Build and run (config file):
 ```bash
 docker build -t watch-follow-follower .
 docker run --rm \
-  -v $(pwd)/data:/app/data \
+  -v $(pwd)/data:/data \
   watch-follow-follower
 ```
 
@@ -84,7 +85,7 @@ docker run --rm \
   -e TWITTER_USERNAME=... \
   -e TWITTER_PASSWORD=... \
   -e TWITTER_EMAIL_ADDRESS=... \
-  -v $(pwd)/data:/app/data \
+  -v $(pwd)/data:/data \
   watch-follow-follower
 ```
 
