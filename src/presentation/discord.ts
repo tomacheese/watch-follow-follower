@@ -27,7 +27,10 @@ function buildDiscordEmbed(params: {
     }
     return users
       .slice(0, 20)
-      .map((user) => `@${user.screenName}`)
+      .map(
+        (user) =>
+          `[@${user.screenName}](https://twitter.com/${encodeURIComponent(user.screenName)})`
+      )
       .join(', ')
   }
 
