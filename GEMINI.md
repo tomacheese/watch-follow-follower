@@ -38,3 +38,4 @@ pnpm install
 - 既存のプロジェクトルールがある場合はそれを優先する。
 
 ## リポジトリ固有
+- 目的: Version 3 of a lightweight checker that captures X (Twitter) follower/following snapshots, diffs changes, and optionally posts a Discord notification.

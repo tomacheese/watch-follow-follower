@@ -95,3 +95,4 @@ pnpm install
 6. PR 本文の崩れがないことを確認する。
 
 ## リポジトリ固有
+- 目的: Version 3 of a lightweight checker that captures X (Twitter) follower/following snapshots, diffs changes, and optionally posts a Discord notification.
