@@ -27,7 +27,10 @@ function buildDiscordEmbed(params: {
     }
     return users
       .slice(0, 20)
-      .map((user) => `@${user.screenName}`)
+      .map(
+        (user) =>
+          `[@${user.screenName}](https://twitter.com/${user.screenName})`
+      )
       .join(', ')
   }
 
@@ -50,7 +53,7 @@ function buildDiscordEmbed(params: {
       },
     ],
     footer: {
-      text: `チェック対象ユーザー: @${params.targetUsername}`,
+      text: `チェック対象ユーザー: [@${params.targetUsername}](https://twitter.com/${params.targetUsername})`,
     },
     timestamp: params.checkedAt,
   }
