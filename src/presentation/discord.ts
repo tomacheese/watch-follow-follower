@@ -53,7 +53,7 @@ function buildDiscordEmbed(params: {
       },
     ],
     footer: {
-      text: `チェック対象ユーザー: [@${params.targetUsername}](https://twitter.com/${encodeURIComponent(params.targetUsername)})`,
+      text: `チェック対象ユーザー: @${params.targetUsername}`,
     },
     timestamp: params.checkedAt,
   }
