@@ -38,4 +38,9 @@ pnpm install
 - 既存のプロジェクトルールがある場合はそれを優先する。
 
 ## リポジトリ固有
-- 目的: Version 3 of a lightweight checker that captures X (Twitter) follower/following snapshots, diffs changes, and optionally posts a Discord notification.
+- 概要: Checks Twitter follow/follower changes and notifies Discord.
+- 主要言語: TypeScript
+- パッケージマネージャー: pnpm
+- 主なエントリポイント: `src/main.ts`
+- CI 定義: `.github/workflows/` を参照
+- 実行環境: `Dockerfile` と `docker-compose.yml` を使用
