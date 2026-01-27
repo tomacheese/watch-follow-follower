@@ -17,7 +17,7 @@
 
 ## プロジェクト概要
 - **目的**: X (Twitter) のフォロー・フォロワー監視および Discord 通知
-- **技術スタック**: TypeScript, Node.js (v24), pnpm
+- **技術スタック**: TypeScript, Node.js (v24.11.1), pnpm
 
 ## コーディング規約
 - **フォーマット/Lint**: プロジェクトの `eslint.config.mjs` および `.prettierrc.yml` に従う。
