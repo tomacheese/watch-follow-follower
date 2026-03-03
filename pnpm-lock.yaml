@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@the-convocation/twitter-scraper':
-        specifier: 0.21.1
-        version: 0.21.1(cycletls@2.0.5)
+        specifier: 0.22.1
+        version: 0.22.1(cycletls@2.0.5)
       cycletls:
         specifier: 2.0.5
         version: 2.0.5
@@ -290,8 +290,8 @@ packages:
   '@sinclair/typebox@0.32.35':
     resolution: {integrity: sha512-Ul3YyOTU++to8cgNkttakC0dWvpERr6RYoHO2W47DLbFvrwBDJUY31B1sImH6JZSYc4Kt4PyHtoPNu+vL2r2dA==}
 
-  '@the-convocation/twitter-scraper@0.21.1':
-    resolution: {integrity: sha512-q8HjTWQyrNMEitJli4/cG1ht0sV67bwWQKv4jWhQnq1OuFNBepdU/kCsbnf43UUk6BgmHdmH3uvHeIjGowqrVQ==}
+  '@the-convocation/twitter-scraper@0.22.1':
+    resolution: {integrity: sha512-eKQs55vvG97XdSEwicNKNGUf8VwcoRAwwgTdISAjE1VlyKh8ikiAvKA0SDMluW/boROL3S+9WPdXfhuivLrEFQ==}
     engines: {node: '>=16'}
     peerDependencies:
       cycletls: ^2.0.5
@@ -1792,7 +1792,7 @@ snapshots:
 
   '@sinclair/typebox@0.32.35': {}
 
-  '@the-convocation/twitter-scraper@0.21.1(cycletls@2.0.5)':
+  '@the-convocation/twitter-scraper@0.22.1(cycletls@2.0.5)':
     dependencies:
       '@sinclair/typebox': 0.32.35
       cross-fetch: 4.1.0

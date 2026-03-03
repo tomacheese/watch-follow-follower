@@ -8,7 +8,7 @@
     "url": "https://github.com/tomacheese/watch-follow-follower/issues"
   },
   "dependencies": {
-    "@the-convocation/twitter-scraper": "0.21.1",
+    "@the-convocation/twitter-scraper": "0.22.1",
     "cycletls": "2.0.5",
     "headers-polyfill": "4.0.3",
     "tsx": "4.21.0",
