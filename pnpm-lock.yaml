@@ -28,8 +28,8 @@ importers:
         specifier: 1.12.38
         version: 1.12.38(eslint-config-standard@17.1.0(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.39.3)(typescript@5.9.3))(eslint@9.39.3))(eslint-plugin-n@17.24.0(eslint@9.39.3)(typescript@5.9.3))(eslint-plugin-promise@7.2.1(eslint@9.39.3))(eslint@9.39.3))(eslint@9.39.3)(typescript@5.9.3)
       '@types/node':
-        specifier: 25.3.2
-        version: 25.3.2
+        specifier: 25.3.3
+        version: 25.3.3
       '@types/tough-cookie':
         specifier: 4.0.5
         version: 4.0.5
@@ -311,8 +311,8 @@ packages:
   '@types/node@20.19.30':
     resolution: {integrity: sha512-WJtwWJu7UdlvzEAUm484QNg5eAoq5QR08KDNx7g45Usrs2NtOPiX8ugDqmKdXkyL03rBqU5dYNYVQetEpBHq2g==}
 
-  '@types/node@25.3.2':
-    resolution: {integrity: sha512-RpV6r/ij22zRRdyBPcxDeKAzH43phWVKEjL2iksqo1Vz3CuBUrgmPpPhALKiRfU7OMCmeeO9vECBMsV0hMTG8Q==}
+  '@types/node@25.3.3':
+    resolution: {integrity: sha512-DpzbrH7wIcBaJibpKo9nnSQL0MTRdnWttGyE5haGwK86xgMOkFLp7vEyfQPGLOJh5wNYiJ3V9PmUMDhV9u8kkQ==}
 
   '@types/tough-cookie@4.0.5':
     resolution: {integrity: sha512-/Ad8+nIOV7Rl++6f1BdKxFSMgmoqEoYbHRpPcx3JEfv8VRsQe9Z4mCXeJBzxs7mbHY/XOZZuXlRNfhpVPbs6ZA==}
@@ -1822,7 +1822,7 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
-  '@types/node@25.3.2':
+  '@types/node@25.3.3':
     dependencies:
       undici-types: 7.18.2
 
