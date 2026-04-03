@@ -198,8 +198,8 @@ async function main(): Promise<void> {
     console.log(
       `Saved followers (${followers.length}) and following (${following.length}).`
     )
-  } catch (error) {
-    logFatalError(error)
+  } catch (err) {
+    logFatalError(err)
     exitCode = 1
   } finally {
     await cleanupCycleTLS()
@@ -208,7 +208,7 @@ async function main(): Promise<void> {
   process.exitCode = exitCode
 }
 
-main().catch((error: unknown) => {
-  logFatalError(error)
+main().catch((err: unknown) => {
+  logFatalError(err)
   process.exitCode = 1
 })

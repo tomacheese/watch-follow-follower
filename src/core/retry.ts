@@ -57,11 +57,11 @@ export async function withRetry<T>(
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await fn()
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       if (attempt >= maxRetries) {
-        throw error
+        throw err
       }
-      const rateLimitDelay = getRateLimitDelayMs(error)
+      const rateLimitDelay = getRateLimitDelayMs(err)
       const delay =
         rateLimitDelay ??
         Math.min(baseDelayMs * Math.pow(2, attempt - 1), maxDelayMs)

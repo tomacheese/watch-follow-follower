@@ -166,15 +166,15 @@ export async function cleanupCycleTLS(): Promise<void> {
     try {
       const instance = await cycleTLSInstancePromise
       await instance.exit()
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error'
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
       console.warn(`CycleTLS instance exit failed: ${message}`)
     }
   }
   try {
     cycleTLSExit()
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error'
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error'
     console.debug(
       `twitter-scraper CycleTLS exit error (may not be initialized): ${message}`
     )
