@@ -77,7 +77,7 @@ export function loadConfigSource(): AppConfigSource {
   if (typeof parsed !== 'object' || parsed === null) {
     throw new Error('Invalid config format')
   }
-  return parsed as AppConfigSource
+  return parsed
 }
 
 /**

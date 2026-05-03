@@ -15,10 +15,10 @@
     "twitter-openapi-typescript": "0.0.55"
   },
   "devDependencies": {
-    "@book000/eslint-config": "1.14.2",
+    "@book000/eslint-config": "1.14.16",
     "@types/node": "25.5.0",
     "@types/tough-cookie": "4.0.5",
-    "eslint": "10.1.0",
+    "eslint": "10.2.1",
     "prettier": "3.8.1",
     "run-z": "2.1.0",
     "typescript": "6.0.2"
