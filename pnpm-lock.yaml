@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@the-convocation/twitter-scraper':
-        specifier: 0.22.1
-        version: 0.22.1(cycletls@2.0.5)
+        specifier: 0.22.3
+        version: 0.22.3(cycletls@2.0.5)
       cycletls:
         specifier: 2.0.5
         version: 2.0.5
@@ -275,8 +275,8 @@ packages:
     peerDependencies:
       eslint: '>=8.40.0'
 
-  '@the-convocation/twitter-scraper@0.22.1':
-    resolution: {integrity: sha512-eKQs55vvG97XdSEwicNKNGUf8VwcoRAwwgTdISAjE1VlyKh8ikiAvKA0SDMluW/boROL3S+9WPdXfhuivLrEFQ==}
+  '@the-convocation/twitter-scraper@0.22.3':
+    resolution: {integrity: sha512-ul5jTuzHAR+XpSm64dl5ke/llc3s43p3rNvVgLmLyy3XcQghAfAaBjZBfCgidrYRDeh1T84VYRAjZd1X9/qqdg==}
     engines: {node: '>=16'}
     peerDependencies:
       cycletls: ^2.0.5
@@ -1567,8 +1567,8 @@ packages:
   x-client-transaction-id-generater@0.0.7:
     resolution: {integrity: sha512-lLIozd8PLITaCwVGvlaOcCczkI/Q/C2zeu69DrBUpIj9rI/Gb0nsxk+f9jS0sexo3frsouxc0JeEw9Bv3C9lxw==}
 
-  x-client-transaction-id@0.1.9:
-    resolution: {integrity: sha512-CES4zgkJ0wbfFWm0qgdKphthyb+L7lVHymgOY15v6ivcWSx5p9lp5kzAed+BuqJSP7bS0GbQyJ16ONkRthgsUw==}
+  x-client-transaction-id@0.2.3:
+    resolution: {integrity: sha512-SgCpLpswNoUAJpphrKrouCByvBCOBWvBiGynQ8+Ioncc67uG5FafTFBpAtpEiUMhjAK/MRIQF578fl9C6BUfKg==}
 
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
@@ -1736,7 +1736,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@the-convocation/twitter-scraper@0.22.1(cycletls@2.0.5)':
+  '@the-convocation/twitter-scraper@0.22.3(cycletls@2.0.5)':
     dependencies:
       '@sinclair/typebox': 0.32.35
       cross-fetch: 4.1.0
@@ -1748,7 +1748,7 @@ snapshots:
       set-cookie-parser: 2.7.2
       tough-cookie: 4.1.4
       tslib: 2.8.1
-      x-client-transaction-id: 0.1.9
+      x-client-transaction-id: 0.2.3
     optionalDependencies:
       cycletls: 2.0.5
     transitivePeerDependencies:
@@ -3343,7 +3343,7 @@ snapshots:
     dependencies:
       node-html-parser: 7.1.0
 
-  x-client-transaction-id@0.1.9:
+  x-client-transaction-id@0.2.3:
     dependencies:
       linkedom: 0.18.12
     transitivePeerDependencies:
