@@ -14,13 +14,10 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-RUN pnpm config set node-linker hoisted
-
-COPY pnpm-lock.yaml ./
+COPY pnpm-lock.yaml package.json tsconfig.json ./
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch
 
-COPY package.json tsconfig.json .npmrc ./
 COPY src src
 COPY entrypoint.sh ./
 
