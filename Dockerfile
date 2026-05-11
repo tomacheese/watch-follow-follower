@@ -14,7 +14,7 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-COPY pnpm-lock.yaml package.json tsconfig.json ./
+COPY pnpm-lock.yaml package.json tsconfig.json pnpm-workspace.yaml ./
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch
 
