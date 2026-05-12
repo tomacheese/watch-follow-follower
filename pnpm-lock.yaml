@@ -25,8 +25,8 @@ importers:
         version: 0.0.55
     devDependencies:
       '@book000/eslint-config':
-        specifier: 1.14.30
-        version: 1.14.30(eslint@10.3.0)(typescript@6.0.3)
+        specifier: 1.14.31
+        version: 1.14.31(eslint@10.3.0)(typescript@6.0.3)
       '@types/node':
         specifier: 25.6.2
         version: 25.6.2
@@ -52,8 +52,8 @@ packages:
     resolution: {integrity: sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q==}
     engines: {node: '>=6.9.0'}
 
-  '@book000/eslint-config@1.14.30':
-    resolution: {integrity: sha512-5oAo0m8QASkeOAX9vjus440amVhsxsoR5SU3aPZX5j8Rs3yUobNGUclpE7idNwWzqXQ8vmdnatM5hjLQqgROcA==}
+  '@book000/eslint-config@1.14.31':
+    resolution: {integrity: sha512-RuPPC+N0cZ8BfegagVr7PsQIuAiExooz2ESQcrFAgYumJMANDviXoujbvAmpwMDvziKivhr+7yqW6IswVZX29Q==}
     peerDependencies:
       eslint: 10.3.0
 
@@ -595,8 +595,8 @@ packages:
   emoji-regex@10.6.0:
     resolution: {integrity: sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A==}
 
-  enhanced-resolve@5.21.3:
-    resolution: {integrity: sha512-QyL119InA+XXEkNLNTPCXPugSvOfhwv0JOlGNzvxs0hZaiHLNvXSpudUWsOlsXGWJh8G6ckCScEkVHfX3kw/2Q==}
+  enhanced-resolve@5.21.2:
+    resolution: {integrity: sha512-xe9vQb5kReirPUxgQrXA3ihgbCqssmTiM7cOZ+Gzu+VeGWgpV98lLZvp0dl4yriyAePcewxGUs9UpKD8PET9KQ==}
     engines: {node: '>=10.13.0'}
 
   entities@4.5.0:
@@ -1590,7 +1590,7 @@ snapshots:
 
   '@babel/helper-validator-identifier@7.28.5': {}
 
-  '@book000/eslint-config@1.14.30(eslint@10.3.0)(typescript@6.0.3)':
+  '@book000/eslint-config@1.14.31(eslint@10.3.0)(typescript@6.0.3)':
     dependencies:
       '@typescript-eslint/parser': 8.59.2(eslint@10.3.0)(typescript@6.0.3)
       eslint: 10.3.0
@@ -2138,7 +2138,7 @@ snapshots:
 
   emoji-regex@10.6.0: {}
 
-  enhanced-resolve@5.21.3:
+  enhanced-resolve@5.21.2:
     dependencies:
       graceful-fs: 4.2.11
       tapable: 2.3.3
@@ -2304,7 +2304,7 @@ snapshots:
   eslint-plugin-n@17.24.0(eslint@10.3.0)(typescript@6.0.3):
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@10.3.0)
-      enhanced-resolve: 5.21.3
+      enhanced-resolve: 5.21.2
       eslint: 10.3.0
       eslint-plugin-es-x: 7.8.0(eslint@10.3.0)
       get-tsconfig: 4.14.0
