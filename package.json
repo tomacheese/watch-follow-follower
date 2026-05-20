@@ -11,7 +11,7 @@
     "@the-convocation/twitter-scraper": "0.22.3",
     "cycletls": "2.0.5",
     "headers-polyfill": "5.0.1",
-    "tsx": "4.22.0",
+    "tsx": "4.22.1",
     "twitter-openapi-typescript": "0.0.55"
   },
   "devDependencies": {
