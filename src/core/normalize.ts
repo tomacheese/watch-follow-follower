@@ -27,9 +27,12 @@ export function normalizeUserSnapshot(data: unknown): UserSnapshot | null {
         protected?: boolean
       }
     | undefined
+  // v0.0.56 以降、 screen_name / name は legacy から core に移動した
+  const core = user.core as { screenName?: string; name?: string } | undefined
 
-  const screenName = legacy?.screenName ?? legacy?.screen_name
-  const name = legacy?.name ?? ''
+  const screenName =
+    legacy?.screenName ?? legacy?.screen_name ?? core?.screenName
+  const name = legacy?.name ?? core?.name ?? ''
 
   if (!restId || !screenName) {
     return null
