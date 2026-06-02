@@ -18,7 +18,7 @@
     "@book000/eslint-config": "1.14.51",
     "@types/node": "25.9.1",
     "@types/tough-cookie": "4.0.5",
-    "eslint": "10.4.0",
+    "eslint": "10.4.1",
     "prettier": "3.8.3",
     "run-z": "2.1.0",
     "typescript": "6.0.3"
