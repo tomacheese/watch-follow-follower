@@ -19,7 +19,7 @@
     "@types/node": "25.9.4",
     "@types/tough-cookie": "4.0.5",
     "eslint": "10.5.0",
-    "prettier": "3.8.4",
+    "prettier": "3.8.5",
     "run-z": "2.1.0",
     "typescript": "6.0.3"
   },
