@@ -26,7 +26,7 @@
   "homepage": "https://github.com/tomacheese/watch-follow-follower",
   "license": "MIT",
   "main": "dist/main.js",
-  "packageManager": "pnpm@11.9.0",
+  "packageManager": "pnpm@11.10.0",
   "repository": {
     "url": "git@github.com:tomacheese/watch-follow-follower.git",
     "type": "git"
