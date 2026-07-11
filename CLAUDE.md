@@ -29,16 +29,12 @@
 ## 環境のルール
 - **ブランチ命名**: [Conventional Branch](https://conventional-branch.github.io) に従う (`feat/`, `fix/` など)
 - **パッケージマネージャー**: `pnpm` を使用
-- **Node.js**: `.node-version` (v24.11.1) に従う
+- **Node.js**: `.node-version` (v24.18.0) に従う
 
 ## コード改修時のルール
-- **エラーメッセージ**: 絵文字の使用はプロジェクトの既存スタイルに合わせる（現状は標準的なテキストログ）。致命的なエラーは `logFatalError` を使用してファイル出力する。
-- **TypeScript**: `skipLibCheck: true` は `tsconfig.json` で設定されている場合でも、型エラーを無視するための安易な利用は避ける。可能な限り型定義を正しく行う。
+- **エラーメッセージ**: 絵文字の使用はプロジェクトの既存スタイルに合わせる（現状は標準的なテキストログ）。致命的なエラーは `src/main.ts` の `logFatalError` を使用してファイル出力する。
+- **TypeScript**: `tsconfig.json` は `strict: true`（`noImplicitAny` / `strictNullChecks` / `noUnusedLocals` / `noUnusedParameters` など）を有効化している。`any` や型エラーの握り潰しに頼らず、型定義を正しく行う。
 - **ドキュメント**: 関数やクラスには日本語で JSDoc を記載する。
-
-## 相談ルール
-- 実装方針に迷った場合や、リポジトリ外の知識が必要な場合は、ユーザーに確認するか適切なツールを使用する。
-- 指摘された内容は無視せず、確実に対応する。
 
 ## 開発コマンド
 ```bash
@@ -62,16 +58,24 @@ pnpm lint:tsc
 ```
 
 ## アーキテクチャと主要ファイル
-- **`src/main.ts`**: エントリーポイント。全体のフロー制御。
+- **`src/main.ts`**: エントリーポイント。全体のフロー制御と `logFatalError`。
 - **`src/app/fetch-users.ts`**: ユーザーリスト取得ロジック。
-- **`src/core/diff.ts`**: フォロー・フォロワーの差分計算。
-- **`src/infra/cycletls.ts`**: CycleTLS を使用した HTTP 通信（スクレイピング対策）。
-- **`src/infra/config.ts`**: 設定読み込み。
+- **`src/core/diff.ts`**: フォロー・フォロワーの差分計算。`src/core/` には他に `normalize.ts` / `retry.ts` / `types.ts` がある。
+- **`src/infra/auth.ts`**: X (Twitter) へのログイン・認証ロジック。
+- **`src/infra/cycletls.ts`**: CycleTLS を使用した HTTP 通信（TLS フィンガープリント対策）。
+- **`src/infra/config.ts`**: 設定・環境変数の読み込み。
+- **`src/infra/fs.ts`**: JSON スナップショット等のファイル入出力。
 - **`src/presentation/discord.ts`**: Discord 通知。
 
 ## 実装パターン
-- **HTTP リクエスト**: `twitter-openapi-typescript` と `cycletls` を組み合わせて使用している。直接 `fetch` を使わず、ラップされたクライアントを使用すること。
-- **設定管理**: 環境変数と設定ファイル (`config.json`) の両方をサポートする `src/infra/config.ts` のパターンに従う。
+- **HTTP リクエスト**: `twitter-openapi-typescript`・`@the-convocation/twitter-scraper`・`cycletls` を組み合わせて使用している。直接 `fetch` を使わず、ラップされたクライアントを使用すること。
+- **設定管理**: 環境変数と設定ファイル (`config.json`) の両方をサポートする `src/infra/config.ts` のパターンに従う。設定パスやデータ出力先はすべて環境変数で上書き可能: `CONFIG_PATH`（デフォルト `./data/config.json`）、`OUTPUT_DIR`（デフォルト `./data`）、`COOKIE_CACHE_PATH`（デフォルト `./data/twitter-cookies.json`）。新しい設定項目を追加する際はハードコードせずこのパターンに従う。
+- **データ出力**: スナップショットと差分は `<OUTPUT_DIR>/<targetUsername>/{followers.json,following.json,diff.json}` に保存される。`data/` はコミット対象外（`.gitignore` 済み）。
+
+## セキュリティ / 機密情報
+- API キー・パスワード・認証トークン・Discord Webhook URL などの機密情報は絶対に Git にコミットしない。認証情報は `config.json`（`data/` 配下）または環境変数で管理する。
+- ログ出力に認証情報・Cookie・個人情報が含まれないよう配慮する。
+- Cookie キャッシュ（`data/twitter-cookies.json`）は機密情報として扱う。
 
 ## テスト
 - 現在、自動テストコードは存在しません。

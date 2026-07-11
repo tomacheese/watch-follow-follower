@@ -1,47 +1,32 @@
-# GitHub Copilot Instructions
+# GitHub Copilot コードレビュー指示
+
+このファイルは GitHub Copilot のコードレビュー機能向けのレビュー基準です。開発作業手順は `CLAUDE.md` を参照。
 
 ## プロジェクト概要
-- 目的: X (Twitter) のフォロー・フォロワーの変更を監視し、Discord に通知する
-- 主な機能: ユーザー情報の取得、差分検出、通知
-- 対象ユーザー: 開発者、Twitter ユーザー
 
-## 共通ルール
-- 会話は日本語で行う。
-- PR とコミットは Conventional Commits に従う。
+X (Twitter) のフォロー・フォロワーの変更を監視し、差分を検出して Discord に通知する TypeScript / Node.js 製ツール。非公式 API に依存する。
+
+## レビュー時の言語
+
+- レビューコメントは日本語で記述する。
 - 日本語と英数字の間には半角スペースを入れる。
 
-## 技術スタック
-- 言語: TypeScript
-- ランタイム: Node.js v24.11.1
-- パッケージマネージャー: pnpm
-- 主要ライブラリ: twitter-openapi-typescript, cycletls
+## 規約（lint / formatter で強制）
 
-## 開発コマンド
-```bash
-# 依存関係のインストール
-pnpm install
+- ESLint (`@book000/eslint-config`) と Prettier で整形・静的解析している。フォーマット指摘は原則ツールに委ねる。
+- TypeScript は `strict: true`（`noImplicitAny` / `strictNullChecks` / `noUnusedLocals` / `noUnusedParameters` など）。`any` や型エラーの握り潰しがあれば指摘する。
+- 直接 `fetch` を使わず、`twitter-openapi-typescript` / `@the-convocation/twitter-scraper` / `cycletls` のラップ済みクライアント経由で HTTP 通信しているか確認する。
+- コミットメッセージは Conventional Commits に従う。
 
-# 開発実行
-pnpm dev
+## 重点的に確認する点
 
-# ビルド（型チェック含む）
-pnpm lint:tsc
+- **機密情報の混入**: API キー・パスワード・認証トークン・Discord Webhook URL・Cookie が、コード・ログ出力・コミット差分に含まれていないか。認証情報は `config.json`（`data/` 配下）または環境変数で管理される。
+- **エラーハンドリング**: 非公式 API・ネットワーク・認証は失敗しうる。例外の握り潰しがないか、致命的エラーが `src/main.ts` の `logFatalError` 経由で扱われているか。
+- **設定値のハードコード**: パスや出力先は環境変数（`CONFIG_PATH` / `OUTPUT_DIR` / `COOKIE_CACHE_PATH`）で上書き可能な設計。新しい設定はハードコードせず `src/infra/config.ts` のパターンに従っているか。
+- **ドキュメント同期**: 新しい設定項目の追加時に `config.sample.json` と `src/infra/config.ts` の型定義が更新されているか。
 
-# Lint / Format チェック
-pnpm lint
+## フラグすべきでない既知パターン
 
-# Lint / Format 自動修正
-pnpm fix
-```
-
-## テスト方針
-- 現在、自動テストコードは存在しません。
-- 品質の確認は `pnpm lint` および `pnpm lint:tsc` を使用して、静的解析と型チェックを行ってください。
-
-## セキュリティ / 機密情報
-- API キー、パスワード、認証トークンなどの機密情報は `config.json` や環境変数で管理し、絶対に Git にコミットしない。
-- ログ出力時に、認証情報や個人情報が含まれないように注意する。
-
-## リポジトリ固有
-- `src/infra/cycletls.ts` は TLS フィンガープリント対策のために `cycletls` を使用している。
-- 設定ファイルは `config.sample.json` をコピーして `config.json` (または `data/config.json`) として使用する想定。
+- 自動テストコードは存在しない。テスト欠如そのものは指摘不要（品質確認は `pnpm lint` / `pnpm lint:tsc` の静的解析で担保）。
+- `data/` 配下（スナップショット・Cookie キャッシュ）は `.gitignore` 済みで意図的に追跡外。
+- コード内コメント・JSDoc が日本語であること、およびエラーメッセージが英語であることはプロジェクト規約であり指摘不要。
