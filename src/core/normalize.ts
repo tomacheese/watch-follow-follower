@@ -32,11 +32,11 @@ export function normalizeUserSnapshot(data: unknown): UserSnapshot | null {
 
   const screenName =
     legacy?.screenName ?? legacy?.screen_name ?? core?.screenName
-  const name = legacy?.name ?? core?.name ?? ''
 
   if (!restId || !screenName) {
     return null
   }
+  const name = legacy?.name ?? core?.name ?? ''
 
   return {
     id: restId,

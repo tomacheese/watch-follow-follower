@@ -12,15 +12,17 @@ interface HeadersLike {
   [Symbol.iterator]?: () => Iterator<[string, string]>
 }
 
-let cycleTLSInstancePromise: Promise<CycleTLSClient> | null = null
+const cycleTLSState: { instancePromise: Promise<CycleTLSClient> | null } = {
+  instancePromise: null,
+}
 
 /**
  * CycleTLS インスタンスを初期化し、共有する。
  * @returns CycleTLS クライアント。
  */
 async function initCycleTLSWithProxy(): Promise<CycleTLSClient> {
-  cycleTLSInstancePromise ??= initCycleTLS()
-  return cycleTLSInstancePromise
+  cycleTLSState.instancePromise ??= initCycleTLS()
+  return cycleTLSState.instancePromise
 }
 
 /**
@@ -38,7 +40,7 @@ export async function cycleTLSFetchWithProxy(
     typeof input === 'string'
       ? input
       : input instanceof URL
-        ? input.toString()
+        ? input.href
         : input.url
 
   const method = (init?.method ?? 'GET').toUpperCase()
@@ -54,7 +56,7 @@ export async function cycleTLSFetchWithProxy(
       for (const [key, value] of init.headers) {
         headers[key] = value
       }
-    } else if (h[Symbol.iterator] && typeof h[Symbol.iterator] === 'function') {
+    } else if (typeof h[Symbol.iterator] === 'function') {
       for (const [key, value] of init.headers as unknown as Iterable<
         [string, string]
       >) {
@@ -91,7 +93,7 @@ export async function cycleTLSFetchWithProxy(
         const proxyUrl = new URL(normalizedProxyServer)
         proxyUrl.username = proxyUsername
         proxyUrl.password = proxyPassword
-        proxy = proxyUrl.toString()
+        proxy = proxyUrl.href
       } catch {
         throw new Error(
           `Invalid PROXY_SERVER URL: ${proxyServer}. Expected format: host:port, http://host:port or https://host:port`
@@ -162,9 +164,9 @@ export async function cycleTLSFetchWithProxy(
  * @returns なし。
  */
 export async function cleanupCycleTLS(): Promise<void> {
-  if (cycleTLSInstancePromise) {
+  if (cycleTLSState.instancePromise) {
     try {
-      const instance = await cycleTLSInstancePromise
+      const instance = await cycleTLSState.instancePromise
       await instance.exit()
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'

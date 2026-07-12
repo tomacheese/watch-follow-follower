@@ -8,17 +8,17 @@ import { type UserSnapshot } from '../core/types.js'
  */
 /**
  * Discord 用の Embed を組み立てる。
- * @param params パラメータ。
+ * @param parameters パラメータ。
  * @returns Embed オブジェクト。
  */
-function buildDiscordEmbed(params: {
+function buildDiscordEmbed(parameters: {
   title: string
   diff: { added: UserSnapshot[]; removed: UserSnapshot[] }
   targetUsername: string
   checkedAt: string
 }): Record<string, unknown> {
-  const addedCount = params.diff.added.length
-  const removedCount = params.diff.removed.length
+  const addedCount = parameters.diff.added.length
+  const removedCount = parameters.diff.removed.length
   const total = addedCount + removedCount
 
   const formatUsers = (users: UserSnapshot[]): string => {
@@ -34,11 +34,11 @@ function buildDiscordEmbed(params: {
       .join(', ')
   }
 
-  const addedText = formatUsers(params.diff.added)
-  const removedText = formatUsers(params.diff.removed)
+  const addedText = formatUsers(parameters.diff.added)
+  const removedText = formatUsers(parameters.diff.removed)
 
   return {
-    title: `${params.title === 'フォロワー' ? '👥' : '🔔'} ${params.title}`,
+    title: `${parameters.title === 'フォロワー' ? '👥' : '🔔'} ${parameters.title}`,
     color: 0x1d_a1_f2,
     fields: [
       {
@@ -53,9 +53,9 @@ function buildDiscordEmbed(params: {
       },
     ],
     footer: {
-      text: `チェック対象ユーザー: @${params.targetUsername}`,
+      text: `チェック対象ユーザー: @${parameters.targetUsername}`,
     },
-    timestamp: params.checkedAt,
+    timestamp: parameters.checkedAt,
   }
 }
 
@@ -111,7 +111,12 @@ export async function sendDiscordNotification(
   })
 
   if (!response.ok) {
-    const text = await response.text().catch(() => '')
+    let text = ''
+    try {
+      text = await response.text()
+    } catch {
+      // レスポンスボディが読めなくてもログ出力自体は継続する
+    }
     console.warn(
       `Discord webhook failed: ${response.status} ${response.statusText} ${text}`.trim()
     )

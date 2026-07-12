@@ -11,12 +11,12 @@ export function diffUsers(
   previous: UserSnapshot[] | undefined,
   current: UserSnapshot[]
 ): { added: UserSnapshot[]; removed: UserSnapshot[] } {
-  const prevMap = new Map((previous ?? []).map((user) => [user.id, user]))
-  const currMap = new Map(current.map((user) => [user.id, user]))
+  const previousMap = new Map((previous ?? []).map((user) => [user.id, user]))
+  const currentMap = new Map(current.map((user) => [user.id, user]))
 
-  const added = sortUsers(current.filter((user) => !prevMap.has(user.id)))
+  const added = sortUsers(current.filter((user) => !previousMap.has(user.id)))
   const removed = sortUsers(
-    (previous ?? []).filter((user) => !currMap.has(user.id))
+    (previous ?? []).filter((user) => !currentMap.has(user.id))
   )
 
   return { added, removed }

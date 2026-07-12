@@ -24,9 +24,9 @@ export function readJsonFile(filePath: string): unknown {
  * @param data 書き込みデータ。
  */
 export function writeJsonFile(filePath: string, data: unknown): void {
-  const dir = path.dirname(filePath)
-  if (dir && dir !== '.' && !fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true })
+  const directory = path.dirname(filePath)
+  if (directory && directory !== '.' && !fs.existsSync(directory)) {
+    fs.mkdirSync(directory, { recursive: true })
   }
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
 }

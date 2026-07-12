@@ -29,11 +29,11 @@ function isValidCachedCookies(data: unknown): data is CachedCookies {
   if (typeof data !== 'object' || data === null) {
     return false
   }
-  const obj = data as Record<string, unknown>
+  const object = data as Record<string, unknown>
   return (
-    typeof obj.auth_token === 'string' &&
-    typeof obj.ct0 === 'string' &&
-    typeof obj.savedAt === 'number'
+    typeof object.auth_token === 'string' &&
+    typeof object.ct0 === 'string' &&
+    typeof object.savedAt === 'number'
   )
 }
 
@@ -68,9 +68,9 @@ function loadCachedCookies(): CachedCookies | null {
  * @param ct0 ct0 の値。
  */
 function saveCookies(authToken: string, ct0: string): void {
-  const dir = path.dirname(COOKIE_CACHE_FILE)
-  if (dir && dir !== '.' && !fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true })
+  const directory = path.dirname(COOKIE_CACHE_FILE)
+  if (directory && directory !== '.' && !fs.existsSync(directory)) {
+    fs.mkdirSync(directory, { recursive: true })
   }
   const data: CachedCookies = {
     auth_token: authToken,

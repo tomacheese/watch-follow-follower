@@ -100,31 +100,30 @@ export function loadConfig(): AppConfig {
  * @returns 認証情報。
  */
 export function getCredentials(): Credentials {
-  const envUsername = process.env.TWITTER_USERNAME
-  const envPassword = process.env.TWITTER_PASSWORD
-  const envEmail = process.env.TWITTER_EMAIL_ADDRESS
-  const envTwoFactor = process.env.TWITTER_AUTH_CODE_SECRET
+  const environmentUsername = process.env.TWITTER_USERNAME
+  const environmentPassword = process.env.TWITTER_PASSWORD
+  const environmentEmail = process.env.TWITTER_EMAIL_ADDRESS
+  const environmentTwoFactor = process.env.TWITTER_AUTH_CODE_SECRET
 
-  let config: AppConfig | null = null
-  if (!envUsername || !envPassword) {
-    config = loadConfig()
-  } else if (!envEmail && fs.existsSync(CONFIG_PATH)) {
-    config = loadConfig()
-  }
+  const requiresConfig =
+    !environmentUsername ||
+    !environmentPassword ||
+    (!environmentEmail && fs.existsSync(CONFIG_PATH))
+  const config: AppConfig | null = requiresConfig ? loadConfig() : null
 
-  const username = envUsername ?? config?.twitter.username
-  const password = envPassword ?? config?.twitter.password
-  const emailAddress = envEmail ?? config?.twitter.emailAddress
+  const username = environmentUsername ?? config?.twitter.username
+  const password = environmentPassword ?? config?.twitter.password
 
   if (!username || !password) {
     throw new Error('TWITTER_USERNAME or TWITTER_PASSWORD is not set')
   }
+  const emailAddress = environmentEmail ?? config?.twitter.emailAddress
 
   return {
     username,
     password,
     emailAddress,
-    twoFactorSecret: envTwoFactor,
+    twoFactorSecret: environmentTwoFactor,
   }
 }
 

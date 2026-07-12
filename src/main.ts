@@ -44,11 +44,11 @@ function formatErrorDetails(error: unknown): string {
 function logFatalError(error: unknown): void {
   const errorDetails = formatErrorDetails(error)
   const timestamp = new Date().toISOString().replaceAll(':', '-')
-  const logDir = path.join(OUTPUT_DIR, 'logs')
-  const logPath = path.join(logDir, `fatal-error-${timestamp}.log`)
+  const logDirectory = path.join(OUTPUT_DIR, 'logs')
+  const logPath = path.join(logDirectory, `fatal-error-${timestamp}.log`)
 
   try {
-    fs.mkdirSync(logDir, { recursive: true })
+    fs.mkdirSync(logDirectory, { recursive: true })
     fs.writeFileSync(logPath, errorDetails, 'utf8')
     console.error(`Fatal error occurred. Details saved to ${logPath}`)
   } catch {
@@ -116,14 +116,14 @@ async function main(): Promise<void> {
       })
     )
 
-    const targetDir = path.join(
+    const targetDirectory = path.join(
       OUTPUT_DIR,
       targetUsername.replaceAll(/[^a-zA-Z0-9_-]/g, '_')
     )
 
-    const followersPath = path.join(targetDir, 'followers.json')
-    const followingPath = path.join(targetDir, 'following.json')
-    const diffPath = path.join(targetDir, 'diff.json')
+    const followersPath = path.join(targetDirectory, 'followers.json')
+    const followingPath = path.join(targetDirectory, 'following.json')
+    const diffPath = path.join(targetDirectory, 'diff.json')
 
     const previousFollowers = readJsonFile(followersPath) as SnapshotFile | null
     const previousFollowing = readJsonFile(followingPath) as SnapshotFile | null
@@ -208,7 +208,11 @@ async function main(): Promise<void> {
   process.exitCode = exitCode
 }
 
-main().catch((error: unknown) => {
-  logFatalError(error)
-  process.exitCode = 1
-})
+;(async () => {
+  try {
+    await main()
+  } catch (error) {
+    logFatalError(error)
+    process.exitCode = 1
+  }
+})()

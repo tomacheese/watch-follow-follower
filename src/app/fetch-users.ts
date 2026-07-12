@@ -3,6 +3,31 @@ import { withRetry } from '../core/retry.js'
 import { type UserSnapshot } from '../core/types.js'
 
 /**
+ * 1ページ分のアイテムを正規化し、未取得のユーザーのみ追加する。
+ * @param items 1ページ分の生アイテム一覧。
+ * @param users 追記先のユーザー一覧。
+ * @param seen 取得済みユーザー ID の集合。
+ * @returns このページで追加した件数。
+ */
+function addUniqueUsers(
+  items: unknown[],
+  users: UserSnapshot[],
+  seen: Set<string>
+): number {
+  let pageAdded = 0
+  for (const item of items) {
+    const snapshot = normalizeUserSnapshot(item)
+    if (!snapshot || seen.has(snapshot.id)) {
+      continue
+    }
+    seen.add(snapshot.id)
+    users.push(snapshot)
+    pageAdded += 1
+  }
+  return pageAdded
+}
+
+/**
  * カーソルを辿って全ページ取得する。
  * @param label ログ用ラベル。
  * @param fetchPage 1ページ取得関数。
@@ -30,19 +55,7 @@ export async function fetchAllUsers(
       operationName: `${label} page ${page}`,
     })
 
-    let pageAdded = 0
-    for (const item of response.data.data) {
-      const snapshot = normalizeUserSnapshot(item)
-      if (!snapshot) {
-        continue
-      }
-      if (seen.has(snapshot.id)) {
-        continue
-      }
-      seen.add(snapshot.id)
-      users.push(snapshot)
-      pageAdded += 1
-    }
+    const pageAdded = addUniqueUsers(response.data.data, users, seen)
 
     const nextCursor = response.data.cursor.bottom?.value
     console.log(
