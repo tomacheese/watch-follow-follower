@@ -18,6 +18,9 @@ export function normalizeUserSnapshot(data: unknown): UserSnapshot | null {
     (user.restId as string | undefined) ??
     (user.rest_id as string | undefined) ??
     (user.legacy as { idStr?: string } | undefined)?.idStr
+  if (!restId) {
+    return null
+  }
   const legacy = user.legacy as
     | {
         screenName?: string
@@ -32,11 +35,10 @@ export function normalizeUserSnapshot(data: unknown): UserSnapshot | null {
 
   const screenName =
     legacy?.screenName ?? legacy?.screen_name ?? core?.screenName
-  const name = legacy?.name ?? core?.name ?? ''
-
-  if (!restId || !screenName) {
+  if (!screenName) {
     return null
   }
+  const name = legacy?.name ?? core?.name ?? ''
 
   return {
     id: restId,

@@ -105,20 +105,18 @@ export function getCredentials(): Credentials {
   const envEmail = process.env.TWITTER_EMAIL_ADDRESS
   const envTwoFactor = process.env.TWITTER_AUTH_CODE_SECRET
 
-  let config: AppConfig | null = null
-  if (!envUsername || !envPassword) {
-    config = loadConfig()
-  } else if (!envEmail && fs.existsSync(CONFIG_PATH)) {
-    config = loadConfig()
-  }
+  const config: AppConfig | null =
+    !envUsername || !envPassword || (!envEmail && fs.existsSync(CONFIG_PATH))
+      ? loadConfig()
+      : null
 
   const username = envUsername ?? config?.twitter.username
   const password = envPassword ?? config?.twitter.password
-  const emailAddress = envEmail ?? config?.twitter.emailAddress
 
   if (!username || !password) {
     throw new Error('TWITTER_USERNAME or TWITTER_PASSWORD is not set')
   }
+  const emailAddress = envEmail ?? config?.twitter.emailAddress
 
   return {
     username,
