@@ -15,7 +15,7 @@
     "twitter-openapi-typescript": "0.0.56"
   },
   "devDependencies": {
-    "@book000/eslint-config": "1.16.10",
+    "@book000/eslint-config": "1.16.11",
     "@types/node": "25.9.5",
     "@types/tough-cookie": "4.0.5",
     "eslint": "10.7.0",
