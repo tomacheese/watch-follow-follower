@@ -56,6 +56,13 @@ Optional:
 - `PROXY_SERVER` (format: `host:port` or `http(s)://host:port`)
 - `PROXY_USERNAME`
 - `PROXY_PASSWORD`
+- `LOG_DIR` (default: `logs`; log file output directory, provided by `@book000/node-utils`)
+- `LOG_LEVEL` (default: `info`; minimum level for console output)
+- `LOG_FILE_LEVEL` (default: `info`; minimum level for file output)
+- `SENTRY_DSN` (unset by default; when set, error/warn logs are automatically forwarded to GlitchTip)
+- `SENTRY_LOG_LEVEL` (default: `warn`; minimum level forwarded to GlitchTip)
+
+These logging-related variables are not set within this repository (e.g. in `docker-compose.yml`); set them on the host/runtime environment if needed.
 
 ## Output
 
