@@ -1,6 +1,9 @@
 import { normalizeUserSnapshot, sortUsers } from '../core/normalize.js'
 import { withRetry } from '../core/retry.js'
 import { type UserSnapshot } from '../core/types.js'
+import { Logger } from '@book000/node-utils'
+
+const logger = Logger.configure('fetch-users')
 
 /**
  * カーソルを辿って全ページ取得する。
@@ -21,7 +24,7 @@ export async function fetchAllUsers(
   let emptyPageStreak = 0
   while (true) {
     page += 1
-    console.log(
+    logger.info(
       `${label} page ${page} fetching...${cursor ? ` cursor=${cursor}` : ''}`
     )
     const response = await withRetry(() => fetchPage(cursor), {
@@ -45,7 +48,7 @@ export async function fetchAllUsers(
     }
 
     const nextCursor = response.data.cursor.bottom?.value
-    console.log(
+    logger.info(
       `${label} page ${page} fetched: +${pageAdded} (total ${users.length})`
     )
     if (pageAdded === 0) {
