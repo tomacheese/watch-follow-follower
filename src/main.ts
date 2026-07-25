@@ -181,7 +181,10 @@ async function main(): Promise<void> {
 }
 
 main().catch((error: unknown) => {
-  logger.error('Fatal error occurred', toError(error))
+  // main() の finally 内で Logger.closeAll() 済みのためキャッシュがクリアされており、
+  // モジュールスコープの logger をそのまま使うとログが失われる可能性がある。再取得する。
+  const finalLogger = Logger.configure('main')
+  finalLogger.error('Fatal error occurred', toError(error))
   Logger.closeAll()
   process.exitCode = 1
 })
