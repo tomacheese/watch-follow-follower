@@ -1,3 +1,7 @@
+import { Logger } from '@book000/node-utils'
+
+const logger = Logger.configure('retry')
+
 /**
  * 429 の Rate Limit から待機時間を計算する。
  * @param error 例外。
@@ -19,14 +23,14 @@ export function getRateLimitDelayMs(error: unknown): number | null {
       const now = Date.now()
       const waitMs = Math.max(resetMs - now, 1000)
       const resetTime = new Date(resetMs).toISOString()
-      console.warn(
+      logger.info(
         `Rate limit hit (remaining ${remaining ?? 'unknown'}/${limit ?? 'unknown'}). Reset at ${resetTime}.`
       )
       return waitMs + 2000
     }
   }
   if (err.message) {
-    console.warn(`Rate limit hit: ${err.message}`)
+    logger.info(`Rate limit hit: ${err.message}`)
   }
   return 30_000
 }
@@ -67,11 +71,11 @@ export async function withRetry<T>(
         Math.min(baseDelayMs * Math.pow(2, attempt - 1), maxDelayMs)
       const delaySeconds = Math.ceil(delay / 1000)
       if (rateLimitDelay) {
-        console.warn(
+        logger.info(
           `${operationName} hit rate limit, retrying in ${delaySeconds}s...`
         )
       } else {
-        console.warn(
+        logger.info(
           `${operationName} failed (attempt ${attempt}/${maxRetries}), retrying in ${delaySeconds}s...`
         )
       }
