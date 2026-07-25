@@ -1,6 +1,18 @@
 import { cycleTLSExit } from '@the-convocation/twitter-scraper/cycletls'
 import initCycleTLS, { type CycleTLSClient } from 'cycletls'
 import { Headers } from 'headers-polyfill'
+import { Logger } from '@book000/node-utils'
+
+const logger = Logger.configure('cycletls')
+
+/**
+ * unknown な例外情報を Error に変換する。
+ * @param error - 例外情報。
+ * @returns Error インスタンス。
+ */
+function toError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error))
+}
 
 /**
  * undici/Headers 互換の Headers 形状。
@@ -167,16 +179,15 @@ export async function cleanupCycleTLS(): Promise<void> {
       const instance = await cycleTLSInstancePromise
       await instance.exit()
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error'
-      console.warn(`CycleTLS instance exit failed: ${message}`)
+      logger.warn('CycleTLS instance exit failed', toError(error))
     }
   }
   try {
     cycleTLSExit()
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error'
-    console.debug(
-      `twitter-scraper CycleTLS exit error (may not be initialized): ${message}`
+    logger.debug(
+      'twitter-scraper CycleTLS exit error (may not be initialized)',
+      { message: toError(error).message }
     )
   }
 }
