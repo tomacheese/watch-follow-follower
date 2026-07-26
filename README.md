@@ -62,7 +62,7 @@ Optional:
 - `SENTRY_DSN` (unset by default; when set, error/warn logs are automatically forwarded to GlitchTip)
 - `SENTRY_LOG_LEVEL` (default: `warn`; minimum level forwarded to GlitchTip)
 
-These logging-related variables are not set within this repository (e.g. in `docker-compose.yml`); set them on the host/runtime environment if needed.
+`LOG_DIR` is set to `/data/logs` in the Dockerfile so log files persist under the container's mounted data volume by default. The other logging-related variables above are not set within this repository; set them on the host/runtime environment if needed.
 
 ## Output
 

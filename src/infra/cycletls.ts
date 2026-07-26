@@ -6,12 +6,43 @@ import { Logger } from '@book000/node-utils'
 const logger = Logger.configure('cycletls')
 
 /**
+ * GlitchTip へ転送されるログメッセージの最大文字数。
+ * サードパーティ API のエラーには HTTP レスポンスヘッダーやボディ全体が
+ * message に埋め込まれることがあるため、外部送信時の情報量を抑える。
+ */
+const MAX_ERROR_MESSAGE_LENGTH = 2000
+
+/**
+ * エラーメッセージが長すぎる場合に切り詰める。
+ * @param message - 元のメッセージ。
+ * @returns 切り詰め後のメッセージ。
+ */
+function truncateMessage(message: string): string {
+  if (message.length <= MAX_ERROR_MESSAGE_LENGTH) {
+    return message
+  }
+  return `${message.slice(0, MAX_ERROR_MESSAGE_LENGTH)}... [truncated]`
+}
+
+/**
  * unknown な例外情報を Error に変換する。
+ * Error 以外の値は JSON.stringify で構造化情報を保持しつつ、
+ * シリアライズできない場合のみ String() にフォールバックする。
  * @param error - 例外情報。
  * @returns Error インスタンス。
  */
 function toError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error))
+  if (error instanceof Error) {
+    if (error.message.length <= MAX_ERROR_MESSAGE_LENGTH) {
+      return error
+    }
+    return new Error(truncateMessage(error.message))
+  }
+  try {
+    return new Error(truncateMessage(JSON.stringify(error)))
+  } catch {
+    return new Error(truncateMessage(String(error)))
+  }
 }
 
 /**
