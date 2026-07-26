@@ -28,5 +28,6 @@ ENV NODE_ENV=production
 ENV CONFIG_PATH=/data/config.json
 ENV OUTPUT_DIR=/data
 ENV COOKIE_CACHE_PATH=/data/twitter-cookies.json
+ENV LOG_DIR=/data/logs
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]

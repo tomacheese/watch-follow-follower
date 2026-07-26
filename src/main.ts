@@ -1,6 +1,6 @@
-import fs from 'node:fs'
 import path from 'node:path'
 import { TwitterOpenApi } from 'twitter-openapi-typescript'
+import { Logger } from '@book000/node-utils'
 import { diffUsers } from './core/diff.js'
 import { normalizeUserSnapshot } from './core/normalize.js'
 import { type DiffFile, type SnapshotFile } from './core/types.js'
@@ -17,43 +17,45 @@ import { getAuthCookies } from './infra/auth.js'
 import { withRetry } from './core/retry.js'
 import { sendDiscordNotification } from './presentation/discord.js'
 
-/**
- * エラー内容を文字列化する。
- * @param error - 例外情報。
- * @returns エラー内容の文字列。
- */
-function formatErrorDetails(error: unknown): string {
-  if (error instanceof Error) {
-    if (error.stack) {
-      return error.stack
-    }
-    return `${error.name}: ${error.message}`
-  }
+const logger = Logger.configure('main')
 
-  try {
-    return JSON.stringify(error, null, 2)
-  } catch {
-    return String(error)
+/**
+ * GlitchTip へ転送されるログメッセージの最大文字数。
+ * サードパーティ API のエラーには HTTP レスポンスヘッダーやボディ全体が
+ * message に埋め込まれることがあるため、外部送信時の情報量を抑える。
+ */
+const MAX_ERROR_MESSAGE_LENGTH = 2000
+
+/**
+ * エラーメッセージが長すぎる場合に切り詰める。
+ * @param message - 元のメッセージ。
+ * @returns 切り詰め後のメッセージ。
+ */
+function truncateMessage(message: string): string {
+  if (message.length <= MAX_ERROR_MESSAGE_LENGTH) {
+    return message
   }
+  return `${message.slice(0, MAX_ERROR_MESSAGE_LENGTH)}... [truncated]`
 }
 
 /**
- * 致命的なエラーの詳細をファイルに出力する。
+ * unknown な例外情報を Error に変換する。
+ * Error 以外の値は JSON.stringify で構造化情報を保持しつつ、
+ * シリアライズできない場合のみ String() にフォールバックする。
  * @param error - 例外情報。
+ * @returns Error インスタンス。
  */
-function logFatalError(error: unknown): void {
-  const errorDetails = formatErrorDetails(error)
-  const timestamp = new Date().toISOString().replaceAll(':', '-')
-  const logDir = path.join(OUTPUT_DIR, 'logs')
-  const logPath = path.join(logDir, `fatal-error-${timestamp}.log`)
-
+function toError(error: unknown): Error {
+  if (error instanceof Error) {
+    if (error.message.length <= MAX_ERROR_MESSAGE_LENGTH) {
+      return error
+    }
+    return new Error(truncateMessage(error.message))
+  }
   try {
-    fs.mkdirSync(logDir, { recursive: true })
-    fs.writeFileSync(logPath, errorDetails, 'utf8')
-    console.error(`Fatal error occurred. Details saved to ${logPath}`)
+    return new Error(truncateMessage(JSON.stringify(error)))
   } catch {
-    console.error('Fatal error occurred')
-    console.error('Failed to write error log.')
+    return new Error(truncateMessage(String(error)))
   }
 }
 
@@ -68,7 +70,7 @@ async function main(): Promise<void> {
     const discordConfig = getDiscordConfig()
     const targetUsername = getTargetUsername(credentials.username)
 
-    console.log('Target user resolved.')
+    logger.info('Target user resolved.')
 
     const { authToken, ct0 } = await getAuthCookies(credentials)
     TwitterOpenApi.fetchApi = cycleTLSFetchWithProxy
@@ -170,10 +172,10 @@ async function main(): Promise<void> {
 
       writeJsonFile(diffPath, diff)
 
-      console.log(
+      logger.info(
         `Followers: +${followersDiff.added.length} / -${followersDiff.removed.length}`
       )
-      console.log(
+      logger.info(
         `Following: +${followingDiff.added.length} / -${followingDiff.removed.length}`
       )
 
@@ -192,23 +194,28 @@ async function main(): Promise<void> {
         })
       }
     } else {
-      console.log('Snapshot saved. No previous data to diff.')
+      logger.info('Snapshot saved. No previous data to diff.')
     }
 
-    console.log(
+    logger.info(
       `Saved followers (${followers.length}) and following (${following.length}).`
     )
   } catch (error) {
-    logFatalError(error)
+    logger.error('Fatal error occurred', toError(error))
     exitCode = 1
   } finally {
     await cleanupCycleTLS()
+    Logger.closeAll()
   }
 
   process.exitCode = exitCode
 }
 
 main().catch((error: unknown) => {
-  logFatalError(error)
+  // main() の finally 内で Logger.closeAll() 済みのためキャッシュがクリアされており、
+  // モジュールスコープの logger をそのまま使うとログが失われる可能性がある。再取得する。
+  const finalLogger = Logger.configure('main')
+  finalLogger.error('Fatal error occurred', toError(error))
+  Logger.closeAll()
   process.exitCode = 1
 })

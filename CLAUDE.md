@@ -32,7 +32,7 @@
 - **Node.js**: `.node-version` (v24.18.0) に従う
 
 ## コード改修時のルール
-- **エラーメッセージ**: 絵文字の使用はプロジェクトの既存スタイルに合わせる（現状は標準的なテキストログ）。致命的なエラーは `src/main.ts` の `logFatalError` を使用してファイル出力する。
+- **エラーメッセージ**: 絵文字の使用はプロジェクトの既存スタイルに合わせる（現状は標準的なテキストログ）。ログ出力は `@book000/node-utils` の `Logger`（`Logger.configure('<category>')`）経由で行う。致命的なエラーは `src/main.ts` の最上位 catch 節で `logger.error(...)` を使用し、`SENTRY_DSN` 環境変数が設定されている場合は GlitchTip へ自動送信される。
 - **TypeScript**: `tsconfig.json` は `strict: true`（`noImplicitAny` / `strictNullChecks` / `noUnusedLocals` / `noUnusedParameters` など）を有効化している。`any` や型エラーの握り潰しに頼らず、型定義を正しく行う。
 - **ドキュメント**: 関数やクラスには日本語で JSDoc を記載する。
 
@@ -58,7 +58,7 @@ pnpm lint:tsc
 ```
 
 ## アーキテクチャと主要ファイル
-- **`src/main.ts`**: エントリーポイント。全体のフロー制御と `logFatalError`。
+- **`src/main.ts`**: エントリーポイント。全体のフロー制御。
 - **`src/app/fetch-users.ts`**: ユーザーリスト取得ロジック。
 - **`src/core/diff.ts`**: フォロー・フォロワーの差分計算。`src/core/` には他に `normalize.ts` / `retry.ts` / `types.ts` がある。
 - **`src/infra/auth.ts`**: X (Twitter) へのログイン・認証ロジック。
@@ -71,6 +71,7 @@ pnpm lint:tsc
 - **HTTP リクエスト**: `twitter-openapi-typescript`・`@the-convocation/twitter-scraper`・`cycletls` を組み合わせて使用している。直接 `fetch` を使わず、ラップされたクライアントを使用すること。
 - **設定管理**: 環境変数と設定ファイル (`config.json`) の両方をサポートする `src/infra/config.ts` のパターンに従う。設定パスやデータ出力先はすべて環境変数で上書き可能: `CONFIG_PATH`（デフォルト `./data/config.json`）、`OUTPUT_DIR`（デフォルト `./data`）、`COOKIE_CACHE_PATH`（デフォルト `./data/twitter-cookies.json`）。新しい設定項目を追加する際はハードコードせずこのパターンに従う。
 - **データ出力**: スナップショットと差分は `<OUTPUT_DIR>/<targetUsername>/{followers.json,following.json,diff.json}` に保存される。`data/` はコミット対象外（`.gitignore` 済み）。
+- **ログ出力**: `console.*` を直接使わず、各ファイル冒頭で `Logger.configure('<category>')`（`@book000/node-utils`）により生成したロガー経由で出力する。
 
 ## セキュリティ / 機密情報
 - API キー・パスワード・認証トークン・Discord Webhook URL などの機密情報は絶対に Git にコミットしない。認証情報は `config.json`（`data/` 配下）または環境変数で管理する。

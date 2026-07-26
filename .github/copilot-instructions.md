@@ -21,7 +21,7 @@ X (Twitter) のフォロー・フォロワーの変更を監視し、差分を�
 ## 重点的に確認する点
 
 - **機密情報の混入**: API キー・パスワード・認証トークン・Discord Webhook URL・Cookie が、コード・ログ出力・コミット差分に含まれていないか。認証情報は `config.json`（`data/` 配下）または環境変数で管理される。
-- **エラーハンドリング**: 非公式 API・ネットワーク・認証は失敗しうる。例外の握り潰しがないか、致命的エラーが `src/main.ts` の `logFatalError` 経由で扱われているか。
+- **エラーハンドリング**: 非公式 API・ネットワーク・認証は失敗しうる。例外の握り潰しがないか、致命的エラーが `src/main.ts` の最上位 catch 節で `@book000/node-utils` の `Logger` を用いた `logger.error(...)` 経由で扱われているか、`SENTRY_DSN` 環境変数が設定されている場合に GlitchTip へ自動送信される構成になっているか。
 - **設定値のハードコード**: パスや出力先は環境変数（`CONFIG_PATH` / `OUTPUT_DIR` / `COOKIE_CACHE_PATH`）で上書き可能な設計。新しい設定はハードコードせず `src/infra/config.ts` のパターンに従っているか。
 - **ドキュメント同期**: 新しい設定項目の追加時に `config.sample.json` と `src/infra/config.ts` の型定義が更新されているか。
 

@@ -1,4 +1,7 @@
 import { type UserSnapshot } from '../core/types.js'
+import { Logger } from '@book000/node-utils'
+
+const logger = Logger.configure('discord')
 
 /**
  * Discord Webhook に通知する。
@@ -112,8 +115,9 @@ export async function sendDiscordNotification(
 
   if (!response.ok) {
     const text = await response.text().catch(() => '')
-    console.warn(
-      `Discord webhook failed: ${response.status} ${response.statusText} ${text}`.trim()
+    logger.warn(
+      'Discord webhook failed',
+      new Error(`${response.status} ${response.statusText} ${text}`.trim())
     )
   }
 }
