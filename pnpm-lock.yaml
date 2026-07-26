@@ -28,8 +28,8 @@ importers:
         version: 0.0.56
     devDependencies:
       '@book000/eslint-config':
-        specifier: 1.16.18
-        version: 1.16.18(eslint@10.7.0)(typescript@6.0.3)
+        specifier: 1.16.20
+        version: 1.16.20(eslint@10.7.0)(typescript@6.0.3)
       '@types/node':
         specifier: 25.9.5
         version: 25.9.5
@@ -62,8 +62,8 @@ packages:
   '@apm-js-collab/tracing-hooks@0.13.0':
     resolution: {integrity: sha512-mTvWz9rnQwx1U3h0XPTHaX7bgfkpipLLTQyjlC2cdhQpQEuoLT0AGzoydeoq2NxfEVv6fWOOETcSbb2nptleyw==}
 
-  '@book000/eslint-config@1.16.18':
-    resolution: {integrity: sha512-89NYgfNAQTfeRLA+aHkIFV9mpvIJYsGC9Q/yHrWPgMHxpK54H0v06gD9IPBB3NDZkSEYWD7SL5Q7+w4Lqat60g==}
+  '@book000/eslint-config@1.16.20':
+    resolution: {integrity: sha512-VUPgrvXmmHchvzZCQOyclDjTF17AuqvqQ99z9f3rf2Sm6UA0kL3OOFnRNJOagjCWo7QI0dHoIfk4edqy/Aw1Cw==}
     peerDependencies:
       eslint: 10.7.0
 
@@ -1937,7 +1937,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@book000/eslint-config@1.16.18(eslint@10.7.0)(typescript@6.0.3)':
+  '@book000/eslint-config@1.16.20(eslint@10.7.0)(typescript@6.0.3)':
     dependencies:
       '@typescript-eslint/parser': 8.65.0(eslint@10.7.0)(typescript@6.0.3)
       eslint: 10.7.0
