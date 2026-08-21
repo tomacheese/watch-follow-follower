@@ -241,9 +241,11 @@ async function fetchAndValidate(
   let data: unknown
   try {
     data = JSON.parse(bodyText)
-  } catch {
+  } catch (error) {
+    const parseErrorMessage =
+      error instanceof Error ? error.message : String(error)
     logger.error(
-      `Remote config response is not valid JSON: url=${url} status=${response.status} content-type=${contentType} body=${truncateBody(bodyText)}`
+      `Remote config response is not valid JSON: url=${url} status=${response.status} content-type=${contentType} parseError=${parseErrorMessage} body=${truncateBody(bodyText)}`
     )
     throw new Error(`Remote config response is not valid JSON: ${url}`)
   }
@@ -263,8 +265,8 @@ async function fetchAndValidate(
  * `twitter-openapi-typescript` が実行時に取得する remote config
  * (header.json / placeholder.json / pair.json)に限定して、
  * HTTP status / Content-Type / JSON schema の検証、bounded retry、
- * last-known-good cache へのフォールバック、診断ログを行う fetch
- * ラッパーを生成する。対象外の URL は `baseFetch` にそのまま素通しする。
+ * last-known-good cache へのフォールバック、診断ログを行う
+ * fetch ラッパーを生成する。対象外の URL は `baseFetch` にそのまま素通しする。
  * @param baseFetch ラップ対象の fetch 互換関数。
  * @returns fetch 互換の関数。
  */
@@ -300,9 +302,8 @@ export function createGuardedFetch(baseFetch: typeof fetch): typeof fetch {
       const cached = readCache(target.basename)
       if (cached !== null) {
         logger.warn(
-          `Falling back to last-known-good cache for ${target.basename} after fetch failure: ${
-            error instanceof Error ? error.message : String(error)
-          }`
+          `Falling back to last-known-good cache for ${target.basename} after fetch failure`,
+          error instanceof Error ? error : new Error(String(error))
         )
         return toJsonResponse(cached)
       }
