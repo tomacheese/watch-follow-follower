@@ -6,6 +6,7 @@ import { normalizeUserSnapshot } from './core/normalize.js'
 import { type DiffFile, type SnapshotFile } from './core/types.js'
 import { fetchAllUsers } from './app/fetch-users.js'
 import { cycleTLSFetchWithProxy, cleanupCycleTLS } from './infra/cycletls.js'
+import { createGuardedFetch } from './infra/remote-config-fetch.js'
 import {
   OUTPUT_DIR,
   getCredentials,
@@ -73,7 +74,7 @@ async function main(): Promise<void> {
     logger.info('Target user resolved.')
 
     const { authToken, ct0 } = await getAuthCookies(credentials)
-    TwitterOpenApi.fetchApi = cycleTLSFetchWithProxy
+    TwitterOpenApi.fetchApi = createGuardedFetch(cycleTLSFetchWithProxy)
 
     const api = new TwitterOpenApi()
     const client = await api.getClientFromCookies({
