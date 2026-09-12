@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@book000/eslint-config": "1.16.63",
-    "@types/node": "25.9.5",
+    "@types/node": "25.9.6",
     "@types/tough-cookie": "4.0.5",
     "eslint": "10.10.0",
     "prettier": "3.9.6",
