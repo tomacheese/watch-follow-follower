@@ -18,10 +18,9 @@ const MAX_ERROR_MESSAGE_LENGTH = 2000
  * @returns 切り詰め後のメッセージ。
  */
 function truncateMessage(message: string): string {
-  if (message.length <= MAX_ERROR_MESSAGE_LENGTH) {
-    return message
-  }
-  return `${message.slice(0, MAX_ERROR_MESSAGE_LENGTH)}... [truncated]`
+  return message.length <= MAX_ERROR_MESSAGE_LENGTH
+    ? message
+    : `${message.slice(0, MAX_ERROR_MESSAGE_LENGTH)}... [truncated]`
 }
 
 /**
@@ -33,10 +32,9 @@ function truncateMessage(message: string): string {
  */
 function toError(error: unknown): Error {
   if (error instanceof Error) {
-    if (error.message.length <= MAX_ERROR_MESSAGE_LENGTH) {
-      return error
-    }
-    return new Error(truncateMessage(error.message))
+    return error.message.length <= MAX_ERROR_MESSAGE_LENGTH
+      ? error
+      : new Error(truncateMessage(error.message))
   }
   try {
     return new Error(truncateMessage(JSON.stringify(error)))
@@ -152,9 +150,7 @@ export async function cycleTLSFetchWithProxy(
     userAgent:
       headers['user-agent'] ||
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
-  }
-  if (proxy) {
-    options.proxy = proxy
+    ...(proxy && { proxy }),
   }
 
   const response = await instance(

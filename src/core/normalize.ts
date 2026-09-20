@@ -61,9 +61,6 @@ export function normalizeUserSnapshot(data: unknown): UserSnapshot | null {
 export function sortUsers(users: UserSnapshot[]): UserSnapshot[] {
   return users.toSorted((a, b) => {
     const nameCompare = a.screenName.localeCompare(b.screenName, 'en')
-    if (nameCompare !== 0) {
-      return nameCompare
-    }
-    return a.id.localeCompare(b.id, 'en')
+    return nameCompare === 0 ? a.id.localeCompare(b.id, 'en') : nameCompare
   })
 }

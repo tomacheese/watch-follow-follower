@@ -43,10 +43,9 @@ function validateHeaderJson(data: unknown): string[] {
     return ['response is not an object']
   }
   const obj = data as Record<string, unknown>
-  if (typeof obj['chrome-fetch'] !== 'object' || obj['chrome-fetch'] === null) {
-    return ['missing or invalid key: chrome-fetch']
-  }
-  return []
+  return typeof obj['chrome-fetch'] !== 'object' || obj['chrome-fetch'] === null
+    ? ['missing or invalid key: chrome-fetch']
+    : []
 }
 
 /**
@@ -123,10 +122,9 @@ function matchGuardedTarget(url: string): GuardedTarget | null {
   if (url.includes('/twitter-openapi/')) {
     return { basename: 'placeholder.json', validate: validatePlaceholderJson }
   }
-  if (url.includes('/x-client-transaction-pair-dict/')) {
-    return { basename: 'pair.json', validate: validatePairJson }
-  }
-  return null
+  return url.includes('/x-client-transaction-pair-dict/')
+    ? { basename: 'pair.json', validate: validatePairJson }
+    : null
 }
 
 /**
@@ -135,10 +133,9 @@ function matchGuardedTarget(url: string): GuardedTarget | null {
  * @returns 切り詰め後の文字列。
  */
 function truncateBody(body: string): string {
-  if (body.length <= MAX_BODY_PREFIX_LENGTH) {
-    return body
-  }
-  return `${body.slice(0, MAX_BODY_PREFIX_LENGTH)}... [truncated]`
+  return body.length <= MAX_BODY_PREFIX_LENGTH
+    ? body
+    : `${body.slice(0, MAX_BODY_PREFIX_LENGTH)}... [truncated]`
 }
 
 /**
@@ -158,10 +155,9 @@ function cachePath(basename: string): string {
 function readCache(basename: string): unknown {
   try {
     const file = cachePath(basename)
-    if (!fs.existsSync(file)) {
-      return null
-    }
-    return JSON.parse(fs.readFileSync(file, 'utf8'))
+    return fs.existsSync(file)
+      ? JSON.parse(fs.readFileSync(file, 'utf8'))
+      : null
   } catch (error) {
     logger.warn(
       `Failed to read remote config cache for ${basename}`,
