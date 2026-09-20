@@ -25,16 +25,15 @@ function buildDiscordEmbed(params: {
   const total = addedCount + removedCount
 
   const formatUsers = (users: UserSnapshot[]): string => {
-    if (users.length === 0) {
-      return 'なし'
-    }
-    return users
-      .slice(0, 20)
-      .map(
-        (user) =>
-          `[@${user.screenName}](https://twitter.com/${encodeURIComponent(user.screenName)})`
-      )
-      .join(', ')
+    return users.length === 0
+      ? 'なし'
+      : users
+          .slice(0, 20)
+          .map(
+            (user) =>
+              `[@${user.screenName}](https://twitter.com/${encodeURIComponent(user.screenName)})`
+          )
+          .join(', ')
   }
 
   const addedText = formatUsers(params.diff.added)
@@ -76,29 +75,24 @@ export async function sendDiscordNotification(
   const followingChanges =
     payload.following.added.length + payload.following.removed.length
 
-  const embeds: Record<string, unknown>[] = []
-
-  if (followerChanges > 0) {
-    embeds.push(
-      buildDiscordEmbed({
-        title: 'フォロワー',
-        diff: payload.followers,
-        targetUsername: payload.targetUsername,
-        checkedAt: payload.checkedAt,
-      })
-    )
-  }
-
-  if (followingChanges > 0) {
-    embeds.push(
-      buildDiscordEmbed({
-        title: 'フォロー',
-        diff: payload.following,
-        targetUsername: payload.targetUsername,
-        checkedAt: payload.checkedAt,
-      })
-    )
-  }
+  const embeds: Record<string, unknown>[] = [
+    followerChanges > 0
+      ? buildDiscordEmbed({
+          title: 'フォロワー',
+          diff: payload.followers,
+          targetUsername: payload.targetUsername,
+          checkedAt: payload.checkedAt,
+        })
+      : undefined,
+    followingChanges > 0
+      ? buildDiscordEmbed({
+          title: 'フォロー',
+          diff: payload.following,
+          targetUsername: payload.targetUsername,
+          checkedAt: payload.checkedAt,
+        })
+      : undefined,
+  ].filter((embed): embed is Record<string, unknown> => embed !== undefined)
 
   if (embeds.length === 0) {
     return
@@ -113,11 +107,13 @@ export async function sendDiscordNotification(
     }),
   })
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => '')
-    logger.warn(
-      'Discord webhook failed',
-      new Error(`${response.status} ${response.statusText} ${text}`.trim())
-    )
+  if (response.ok) {
+    return
   }
+
+  const text = await response.text().catch(() => '')
+  logger.warn(
+    'Discord webhook failed',
+    new Error(`${response.status} ${response.statusText} ${text}`.trim())
+  )
 }
