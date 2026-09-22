@@ -189,8 +189,8 @@ importers:
         specifier: 1.16.71
         version: 1.16.71(eslint@10.11.0)(typescript@6.0.3)
       '@types/node':
-        specifier: 25.9.7
-        version: 25.9.7
+        specifier: 25.9.8
+        version: 25.9.8
       '@types/tough-cookie':
         specifier: 4.0.5
         version: 4.0.5
@@ -582,6 +582,9 @@ packages:
 
   '@types/node@25.9.7':
     resolution: {integrity: sha512-Y+axoNWOFLvDNFxNbDA+kqqV05imHwTu5bZWWO6tQM3Y2NX1jvzUJkYlf4nYnMCnvu4wQBKW6Nr+ok6yHWA9aQ==}
+
+  '@types/node@25.9.8':
+    resolution: {integrity: sha512-VfMrScDmMhUJQmd5hArdQnFvK0OIeD36uN2Va1FcpYaLB/BgkgM8Ulc50XtYISPMz7APJ30+N0T5EM0jlcdfRw==}
 
   '@types/set-cookie-parser@2.4.10':
     resolution: {integrity: sha512-GGmQVGpQWUe5qglJozEjZV/5dyxbOOZ0LHe/lqyWssB88Y4svNfst0uqBVscdDeIKl5Jy5+aPSvy7mI9tYRguw==}
@@ -2398,6 +2401,10 @@ snapshots:
       undici-types: 6.21.0
 
   '@types/node@25.9.7':
+    dependencies:
+      undici-types: 7.24.6
+
+  '@types/node@25.9.8':
     dependencies:
       undici-types: 7.24.6
 
