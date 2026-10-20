@@ -182,8 +182,8 @@ importers:
         specifier: 4.23.15
         version: 4.23.15
       twitter-openapi-typescript:
-        specifier: 0.1.0
-        version: 0.1.0
+        specifier: 0.1.2
+        version: 0.1.2
     devDependencies:
       '@book000/eslint-config':
         specifier: 1.16.93
@@ -1676,8 +1676,8 @@ packages:
   twitter-openapi-typescript-generated@0.1.3:
     resolution: {integrity: sha512-BLVqEWKxbYGQWK9y9PYMk5CdrYptIK0MS/1BQQM8s2x1SCfUM01dPGZq5LUtjMUJ/BCnGC335+mix6VJHpEXHQ==}
 
-  twitter-openapi-typescript@0.1.0:
-    resolution: {integrity: sha512-qZRLeMjZodCaxgpIUagHjvWA6RQwjEcuIi2u8mMTld6S2LbYxQItW3uiewEue6ZOlB/nRLEhZYkMLn3K9dwVhg==}
+  twitter-openapi-typescript@0.1.2:
+    resolution: {integrity: sha512-blufyj9xNuyVqe4EcbAEuGj+F+2Zq1CGUQSW6AlCsOSj4LEueMFsnkB+ye/4Ow8SPx3YBe3RsAY8jRCN3dkw/A==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -3197,7 +3197,7 @@ snapshots:
 
   twitter-openapi-typescript-generated@0.1.3: {}
 
-  twitter-openapi-typescript@0.1.0:
+  twitter-openapi-typescript@0.1.2:
     dependencies:
       twitter-openapi-typescript-generated: 0.1.3
       x-client-transaction-id-generater: 0.0.7
