@@ -146,9 +146,6 @@ async function main(): Promise<void> {
       users: following,
     }
 
-    writeJsonFile(followersPath, followersSnapshot)
-    writeJsonFile(followingPath, followingSnapshot)
-
     if (previousFollowers || previousFollowing) {
       const followersDiff = diffUsers(previousFollowers?.users, followers)
       const followingDiff = diffUsers(previousFollowing?.users, following)
@@ -193,8 +190,12 @@ async function main(): Promise<void> {
         })
       }
     } else {
-      logger.info('Snapshot saved. No previous data to diff.')
+      logger.info('No previous data to diff.')
     }
+
+    // 通知に失敗した場合は差分を次回実行で再検出できるよう、通知完了後にスナップショットを更新する
+    writeJsonFile(followersPath, followersSnapshot)
+    writeJsonFile(followingPath, followingSnapshot)
 
     logger.info(
       `Saved followers (${followers.length}) and following (${following.length}).`

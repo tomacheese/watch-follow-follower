@@ -1,14 +1,11 @@
 import { type UserSnapshot } from '../core/types.js'
-import { Logger } from '@book000/node-utils'
-
-const logger = Logger.configure('discord')
 
 /**
- * Discord Webhook に通知する。
- * @param webhookUrl Webhook URL。
- * @param payload 通知内容。
- * @returns なし。
+ * 追加 / 削除それぞれのユーザー一覧テキストの最大文字数。
+ * 両方を 1 フィールド (上限 1024 文字) に入れるため、ラベル分の余白を残して 480 とする。
  */
+const MAX_USERS_TEXT_LENGTH = 480
+
 /**
  * Discord 用の Embed を組み立てる。
  * @param params パラメータ。
@@ -24,16 +21,26 @@ function buildDiscordEmbed(params: {
   const removedCount = params.diff.removed.length
   const total = addedCount + removedCount
 
+  // Discord の Embed フィールド値は 1024 文字までで、超過すると 400 になり
+  // スナップショットが更新されず通知が永続的に失敗するため、各セクションを上限内に収める
   const formatUsers = (users: UserSnapshot[]): string => {
-    return users.length === 0
-      ? 'なし'
-      : users
-          .slice(0, 20)
-          .map(
-            (user) =>
-              `[@${user.screenName}](https://twitter.com/${encodeURIComponent(user.screenName)})`
-          )
-          .join(', ')
+    if (users.length === 0) {
+      return 'なし'
+    }
+    const links: string[] = []
+    let length = 0
+    for (const user of users.slice(0, 20)) {
+      const link = `[@${user.screenName}](https://twitter.com/${encodeURIComponent(user.screenName)})`
+      if (length + link.length > MAX_USERS_TEXT_LENGTH) {
+        break
+      }
+      links.push(link)
+      length += link.length + 2
+    }
+    const omitted = users.length - links.length
+    return omitted > 0
+      ? `${links.join(', ')} ほか ${omitted} 件`
+      : links.join(', ')
   }
 
   const addedText = formatUsers(params.diff.added)
@@ -61,6 +68,13 @@ function buildDiscordEmbed(params: {
   }
 }
 
+/**
+ * Discord Webhook に通知する。
+ * 非 2xx 応答やネットワーク失敗の場合は例外を throw する。
+ * @param webhookUrl Webhook URL。
+ * @param payload 通知内容。
+ * @returns なし。
+ */
 export async function sendDiscordNotification(
   webhookUrl: string,
   payload: {
@@ -112,8 +126,7 @@ export async function sendDiscordNotification(
   }
 
   const text = await response.text().catch(() => '')
-  logger.warn(
-    'Discord webhook failed',
-    new Error(`${response.status} ${response.statusText} ${text}`.trim())
+  throw new Error(
+    `Discord webhook failed: ${response.status} ${response.statusText} ${text}`.trim()
   )
 }
