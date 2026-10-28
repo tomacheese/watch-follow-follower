@@ -70,15 +70,11 @@ export async function withRetry<T>(
         rateLimitDelay ??
         Math.min(baseDelayMs * Math.pow(2, attempt - 1), maxDelayMs)
       const delaySeconds = Math.ceil(delay / 1000)
-      if (rateLimitDelay) {
-        logger.info(
-          `${operationName} hit rate limit, retrying in ${delaySeconds}s...`
-        )
-      } else {
-        logger.info(
-          `${operationName} failed (attempt ${attempt}/${maxRetries}), retrying in ${delaySeconds}s...`
-        )
-      }
+      logger.info(
+        rateLimitDelay
+          ? `${operationName} hit rate limit, retrying in ${delaySeconds}s...`
+          : `${operationName} failed (attempt ${attempt}/${maxRetries}), retrying in ${delaySeconds}s...`
+      )
       await new Promise((resolve) => setTimeout(resolve, delay))
     }
   }
