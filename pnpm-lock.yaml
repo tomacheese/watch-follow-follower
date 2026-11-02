@@ -186,8 +186,8 @@ importers:
         version: 0.1.3
     devDependencies:
       '@book000/eslint-config':
-        specifier: 1.16.112
-        version: 1.16.112(eslint@10.13.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
+        specifier: 1.16.113
+        version: 1.16.113(eslint@10.13.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
       '@types/node':
         specifier: 26.6.6
         version: 26.6.6
@@ -212,10 +212,10 @@ packages:
   '@acemir/cssom@0.9.32':
     resolution: {integrity: sha512-OijrAUu7rrJhSIoHNg6LMPS5e344nwUHA+1EFYYjrh64D+GmytUsfBQjci45TjT+rd5Spsp8B5xsZDT+TgyXXQ==}
 
-  '@book000/eslint-config@1.16.112':
-    resolution: {integrity: sha512-9t4xkDWhl3V3sjuPw5GZ4C8mCaDBzJm6TmaZqKQLQr2BLxTktCO9U36F1T1KXS8h12bJXLQDSRpTRr4Tv3SiAQ==}
+  '@book000/eslint-config@1.16.113':
+    resolution: {integrity: sha512-lp4nJ8kqnU0p0CPgod1UUhoC1h3IooVsNPS5ssazIB8ft/50bCYuwH4yeKQLhSNC5piZ49tfMNyJQ2iDhbdUjg==}
     peerDependencies:
-      eslint: 10.13.0
+      eslint: 10.14.0
 
   '@book000/node-utils@1.25.192':
     resolution: {integrity: sha512-Zqo+EXqpGlp/yNkuduo3sDbcuUZ/a/ytwkiX1N78KBUrWgqIAupynfs0NUDerkcvcTGZJqAQE9n6DH/HqnHGPg==}
@@ -1877,7 +1877,7 @@ snapshots:
 
   '@acemir/cssom@0.9.32': {}
 
-  '@book000/eslint-config@1.16.112(eslint@10.13.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)':
+  '@book000/eslint-config@1.16.113(eslint@10.13.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)':
     dependencies:
       '@typescript-eslint/parser': 8.72.1(eslint@10.13.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
       eslint: 10.13.0(supports-color@8.1.1)
