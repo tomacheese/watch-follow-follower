@@ -167,8 +167,8 @@ importers:
   .:
     dependencies:
       '@book000/node-utils':
-        specifier: 1.25.190
-        version: 1.25.190
+        specifier: 1.25.192
+        version: 1.25.192
       '@the-convocation/twitter-scraper':
         specifier: 0.22.3
         version: 0.22.3(cycletls@2.0.5)(supports-color@8.1.1)
@@ -217,8 +217,8 @@ packages:
     peerDependencies:
       eslint: 10.13.0
 
-  '@book000/node-utils@1.25.190':
-    resolution: {integrity: sha512-tJQNMVmvDI4AbOabDklxPOWuItoOteNF1EYehOMdgv/JvSw6Ze5e3i/GIPZni9LYpFNm6kpcuB7KF1gKYlw6eQ==}
+  '@book000/node-utils@1.25.192':
+    resolution: {integrity: sha512-Zqo+EXqpGlp/yNkuduo3sDbcuUZ/a/ytwkiX1N78KBUrWgqIAupynfs0NUDerkcvcTGZJqAQE9n6DH/HqnHGPg==}
 
   '@cacheable/memory@2.2.0':
     resolution: {integrity: sha512-CTLKqLItRCEixEAewD3/j9DB3/o96gpTPD4eJ1v+DGOlxZRZncRQkGYqqnAGCscYd6RNeXfGeiuCphsPtqyIfQ==}
@@ -1891,7 +1891,7 @@ snapshots:
       - ts-declaration-location
       - typescript
 
-  '@book000/node-utils@1.25.190':
+  '@book000/node-utils@1.25.192':
     dependencies:
       '@sentry/node': 11.10.0
       cycle: 1.0.3
