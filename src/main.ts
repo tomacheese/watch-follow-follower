@@ -59,6 +59,19 @@ function toError(error: unknown): Error {
 }
 
 /**
+ * X 側の一時的なログインフロー障害（366: flow not accessible / 131: internal error）か判定する。
+ * twitter-scraper の AuthenticationError は "Authentication error (<code>): ..." 形式のメッセージを持つ。
+ * @param error - 例外情報。
+ * @returns 一時的な認証エラーなら true。
+ */
+function isTransientAuthError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    /Authentication error \((?:366|131)\)/.test(error.message)
+  )
+}
+
+/**
  * メイン処理。
  * @returns なし。
  */
@@ -201,7 +214,14 @@ async function main(): Promise<void> {
       `Saved followers (${followers.length}) and following (${following.length}).`
     )
   } catch (error) {
-    logger.error('Fatal error occurred', toError(error))
+    if (isTransientAuthError(error)) {
+      // 一時的な障害で次回の定期実行で再試行されるため、GlitchTip に送られる warn 以上は使わない
+      logger.info(
+        `Transient X login error, will retry on next run: ${toError(error).message}`
+      )
+    } else {
+      logger.error('Fatal error occurred', toError(error))
+    }
     exitCode = 1
   } finally {
     await cleanupCycleTLS()
