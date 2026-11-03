@@ -6,38 +6,26 @@ import { OUTPUT_DIR } from './config.js'
 
 const logger = Logger.configure('remote-config-fetch')
 
-/**
- * 耐障害化の対象とする remote config URL の共通プレフィックス。
- */
 const GUARDED_URL_PREFIX = 'https://raw.githubusercontent.com/fa0311/'
 
 /**
- * 診断ログに残す body 先頭の最大文字数。
+ * Maximum number of leading body characters kept in diagnostic logs.
  */
 const MAX_BODY_PREFIX_LENGTH = 200
 
-/**
- * last-known-good cache の保存先ディレクトリ。
- */
 const CACHE_DIR = path.join(OUTPUT_DIR, 'remote-config-cache')
 
 /**
- * このアプリが実際に使用する必須オペレーションキー
- * (`twitter-openapi-typescript` の userApi/userListApi が参照するキー)。
+ * Operation keys this app actually uses
+ * (referenced by userApi/userListApi in `twitter-openapi-typescript`).
  */
 const REQUIRED_OPERATION_KEYS = ['UserByScreenName', 'Followers', 'Following']
 
 /**
- * スキーマ検証関数の型。問題があれば説明文の配列を返し、問題なければ
- * 空配列を返す。
+ * Schema validator. Returns a list of problem descriptions, or an empty array if valid.
  */
 type SchemaValidator = (data: unknown) => string[]
 
-/**
- * header.json (latest-user-agent) のスキーマを検証する。
- * @param data パース済みレスポンス。
- * @returns 問題点のリスト（空なら妥当）。
- */
 function validateHeaderJson(data: unknown): string[] {
   if (typeof data !== 'object' || data === null || Array.isArray(data)) {
     return ['response is not an object']
@@ -48,11 +36,6 @@ function validateHeaderJson(data: unknown): string[] {
     : []
 }
 
-/**
- * placeholder.json (flag) のスキーマを検証する。
- * @param data パース済みレスポンス。
- * @returns 問題点のリスト（空なら妥当）。
- */
 function validatePlaceholderJson(data: unknown): string[] {
   if (typeof data !== 'object' || data === null || Array.isArray(data)) {
     return ['response is not an object']
@@ -73,11 +56,6 @@ function validatePlaceholderJson(data: unknown): string[] {
   return problems
 }
 
-/**
- * pair.json (x-client-transaction-pair-dict) のスキーマを検証する。
- * @param data パース済みレスポンス。
- * @returns 問題点のリスト（空なら妥当）。
- */
 function validatePairJson(data: unknown): string[] {
   if (!Array.isArray(data) || data.length === 0) {
     return ['response is not a non-empty array']
@@ -98,19 +76,16 @@ function validatePairJson(data: unknown): string[] {
 }
 
 /**
- * 耐障害化の対象 URL と、その検証関数・キャッシュファイル名の組。
+ * Validation settings and cache file name for a guarded URL.
  */
 interface GuardedTarget {
-  /** キャッシュファイル名(拡張子込み)。 */
+  /** Cache file name, including extension. */
   basename: string
-  /** この URL のレスポンスを検証する関数。 */
   validate: SchemaValidator
 }
 
 /**
- * URL が耐障害化の対象かどうかを判定し、対象なら検証設定を返す。
- * @param url 判定対象の URL。
- * @returns 対象なら `GuardedTarget`、対象外なら null。
+ * Return the validation settings if the URL is guarded, otherwise null.
  */
 function matchGuardedTarget(url: string): GuardedTarget | null {
   if (!url.startsWith(GUARDED_URL_PREFIX)) {
@@ -127,30 +102,18 @@ function matchGuardedTarget(url: string): GuardedTarget | null {
     : null
 }
 
-/**
- * 診断ログ用に body を切り詰める。
- * @param body 元の body 文字列。
- * @returns 切り詰め後の文字列。
- */
 function truncateBody(body: string): string {
   return body.length <= MAX_BODY_PREFIX_LENGTH
     ? body
     : `${body.slice(0, MAX_BODY_PREFIX_LENGTH)}... [truncated]`
 }
 
-/**
- * キャッシュファイルの絶対パスを返す。
- * @param basename キャッシュファイル名。
- * @returns ファイルパス。
- */
 function cachePath(basename: string): string {
   return path.join(CACHE_DIR, basename)
 }
 
 /**
- * last-known-good cache を読み込む。
- * @param basename キャッシュファイル名。
- * @returns キャッシュ済みデータ、なければ null。
+ * Read the last-known-good cache. Returns null if missing or unreadable.
  */
 function readCache(basename: string): unknown {
   try {
@@ -168,9 +131,7 @@ function readCache(basename: string): unknown {
 }
 
 /**
- * last-known-good cache を保存する。
- * @param basename キャッシュファイル名。
- * @param data 保存するデータ。
+ * Write the last-known-good cache. Failures are logged and ignored.
  */
 function writeCache(basename: string, data: unknown): void {
   try {
@@ -187,10 +148,7 @@ function writeCache(basename: string, data: unknown): void {
 }
 
 /**
- * パース済みデータから、下流の `.json()` 呼び出しに応答できる
- * `Response` を再構築する。
- * @param data レスポンスとして返すデータ。
- * @returns Response インスタンス。
+ * Rebuild a `Response` from parsed data so downstream `.json()` calls work.
  */
 function toJsonResponse(data: unknown): Response {
   return Response.json(data, {
@@ -200,13 +158,9 @@ function toJsonResponse(data: unknown): Response {
 }
 
 /**
- * 対象 URL を 1 回取得し、status/Content-Type/JSON/schema を検証する。
- * 検証に失敗した場合は診断情報をログに残してエラーを送出する。
- * @param baseFetch 実際の通信に使う fetch 互換関数。
- * @param url 取得対象 URL。
- * @param init fetch のオプション。
- * @param target この URL の検証設定。
- * @returns 検証済みのパース済みデータ。
+ * Fetch the URL once and validate status, Content-Type, JSON, and schema.
+ * On failure, log diagnostics and throw.
+ * @returns Validated, parsed data.
  */
 async function fetchAndValidate(
   baseFetch: typeof fetch,
@@ -258,13 +212,11 @@ async function fetchAndValidate(
 }
 
 /**
- * `twitter-openapi-typescript` が実行時に取得する remote config
- * (header.json / placeholder.json / pair.json)に限定して、
- * HTTP status / Content-Type / JSON schema の検証、bounded retry、
- * last-known-good cache へのフォールバック、診断ログを行う
- * fetch ラッパーを生成する。対象外の URL は `baseFetch` にそのまま素通しする。
- * @param baseFetch ラップ対象の fetch 互換関数。
- * @returns fetch 互換の関数。
+ * Create a `fetch` wrapper for the remote configs that `twitter-openapi-typescript`
+ * loads at runtime (header.json / placeholder.json / pair.json). It validates
+ * HTTP status / Content-Type / JSON schema, retries a bounded number of times,
+ * falls back to the last-known-good cache, and logs diagnostics.
+ * URLs outside the guarded set pass straight through to `baseFetch`.
  */
 export function createGuardedFetch(baseFetch: typeof fetch): typeof fetch {
   return async (

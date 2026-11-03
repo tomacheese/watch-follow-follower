@@ -2,10 +2,8 @@ import { type UserSnapshot } from './types.js'
 import { sortUsers } from './normalize.js'
 
 /**
- * 前回と今回の差分を計算する。
- * @param previous 前回の一覧。
- * @param current 今回の一覧。
- * @returns 追加/削除の差分。
+ * Compute added/removed users between two lists, matched by user ID.
+ * A missing `previous` is treated as empty.
  */
 export function diffUsers(
   previous: UserSnapshot[] | undefined,

@@ -4,6 +4,6 @@ while :
 do
   pnpm start || true
 
-  # 30 分待機
+  # Wait 30 minutes
   sleep 1800
 done

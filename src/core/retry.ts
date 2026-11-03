@@ -3,9 +3,8 @@ import { Logger } from '@book000/node-utils'
 const logger = Logger.configure('retry')
 
 /**
- * 429 の Rate Limit から待機時間を計算する。
- * @param error 例外。
- * @returns 待機ミリ秒。判定できない場合は null。
+ * Compute the wait time in milliseconds from a 429 rate-limit error.
+ * Returns null if the error is not a 429.
  */
 export function getRateLimitDelayMs(error: unknown): number | null {
   const err = error as { response?: Response; message?: string }
@@ -36,11 +35,7 @@ export function getRateLimitDelayMs(error: unknown): number | null {
 }
 
 /**
- * 指数バックオフ付きの汎用リトライ。
- * @typeParam T 返却型。
- * @param fn 実行する関数。
- * @param options リトライ設定。
- * @returns 成功時の戻り値。
+ * Generic retry with exponential backoff. On a 429, waits until `x-rate-limit-reset` (else a fixed 30s) and ignores `maxDelayMs`.
  */
 export async function withRetry<T>(
   fn: () => Promise<T>,

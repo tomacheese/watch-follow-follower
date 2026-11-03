@@ -1,67 +1,56 @@
 /**
- * スナップショット出力用に正規化したユーザー情報。
+ * User info normalized for snapshot output.
  */
 export interface UserSnapshot {
-  /** ユーザー ID（restId）。 */
+  /** User ID (`restId`). */
   id: string
-  /** スクリーンネーム（@なし）。 */
+  /** Screen name without the leading `@`. */
   screenName: string
-  /** 表示名。 */
   name: string
-  /** 従来の認証済みフラグ。 */
+  /** Legacy verified flag. */
   verified: boolean
-  /** Blue 認証フラグ。 */
+  /** Blue (paid) verification flag. */
   isBlueVerified: boolean
-  /** 非公開アカウントフラグ。 */
   protected: boolean
 }
 
 /**
- * ディスクに保存するスナップショットファイル。
+ * Snapshot file (`followers.json` / `following.json`) persisted to disk.
  */
 export interface SnapshotFile {
-  /** 対象のスクリーンネーム。 */
   targetUsername: string
-  /** 対象のユーザー ID。 */
   targetUserId: string
-  /** 取得時刻（ISO 文字列）。 */
+  /** Fetch time (ISO string). */
   fetchedAt: string
-  /** スナップショットのユーザー一覧。 */
   users: UserSnapshot[]
 }
 
 /**
- * ディスクに保存する差分ファイル。
+ * Diff file (`diff.json`) persisted to disk.
  */
 export interface DiffFile {
-  /** 対象のスクリーンネーム。 */
   targetUsername: string
-  /** 対象のユーザー ID。 */
   targetUserId: string
-  /** 差分生成時刻（ISO 文字列）。 */
+  /** Diff generation time (ISO string). */
   generatedAt: string
   previousFetchedAt: {
-    /** 前回の followers 取得時刻（なければ null）。 */
+    /** Previous followers fetch time (null if none). */
     followers: string | null
-    /** 前回の following 取得時刻（なければ null）。 */
+    /** Previous following fetch time (null if none). */
     following: string | null
   }
   currentFetchedAt: {
-    /** 今回の followers 取得時刻。 */
+    /** Current followers fetch time. */
     followers: string
-    /** 今回の following 取得時刻。 */
+    /** Current following fetch time. */
     following: string
   }
   followers: {
-    /** 追加された followers。 */
     added: UserSnapshot[]
-    /** 削除された followers。 */
     removed: UserSnapshot[]
   }
   following: {
-    /** 追加された following。 */
     added: UserSnapshot[]
-    /** 削除された following。 */
     removed: UserSnapshot[]
   }
 }
