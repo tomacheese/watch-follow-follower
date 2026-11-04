@@ -6,10 +6,10 @@ import { Logger } from '@book000/node-utils'
 const logger = Logger.configure('fetch-users')
 
 /**
- * カーソルを辿って全ページ取得する。
- * @param label ログ用ラベル。
- * @param fetchPage 1ページ取得関数。
- * @returns ユーザー一覧。
+ * Fetch all pages by following the cursor, de-duplicate by user ID, and return a sorted list.
+ * Stops when pagination stalls or ends.
+ * @param label Label used in logs.
+ * @param fetchPage Function that fetches one page.
  */
 export async function fetchAllUsers(
   label: string,

@@ -6,16 +6,14 @@ import { Logger } from '@book000/node-utils'
 const logger = Logger.configure('cycletls')
 
 /**
- * GlitchTip へ転送されるログメッセージの最大文字数。
- * サードパーティ API のエラーには HTTP レスポンスヘッダーやボディ全体が
- * message に埋め込まれることがあるため、外部送信時の情報量を抑える。
+ * Maximum length of an error message forwarded to GlitchTip.
+ * Third-party API errors can embed whole HTTP response headers or bodies in
+ * `message`, so cap the amount of data sent externally.
  */
 const MAX_ERROR_MESSAGE_LENGTH = 2000
 
 /**
- * エラーメッセージが長すぎる場合に切り詰める。
- * @param message - 元のメッセージ。
- * @returns 切り詰め後のメッセージ。
+ * Truncate an error message that exceeds `MAX_ERROR_MESSAGE_LENGTH`.
  */
 function truncateMessage(message: string): string {
   return message.length <= MAX_ERROR_MESSAGE_LENGTH
@@ -24,11 +22,9 @@ function truncateMessage(message: string): string {
 }
 
 /**
- * unknown な例外情報を Error に変換する。
- * Error 以外の値は JSON.stringify で構造化情報を保持しつつ、
- * シリアライズできない場合のみ String() にフォールバックする。
- * @param error - 例外情報。
- * @returns Error インスタンス。
+ * Convert an unknown thrown value to an `Error`.
+ * Non-Error values keep their structure via `JSON.stringify`, falling back to
+ * `String()` only when they cannot be serialized.
  */
 function toError(error: unknown): Error {
   if (error instanceof Error) {
@@ -44,20 +40,17 @@ function toError(error: unknown): Error {
 }
 
 /**
- * undici/Headers 互換の Headers 形状。
+ * Minimal shape shared by undici and headers-polyfill `Headers`.
  */
 interface HeadersLike {
-  /** entries がある場合のイテレータ。 */
   entries?: () => IterableIterator<[string, string]>
-  /** イテレータ対応（任意）。 */
   [Symbol.iterator]?: () => Iterator<[string, string]>
 }
 
 let cycleTLSInstancePromise: Promise<CycleTLSClient> | null = null
 
 /**
- * CycleTLS インスタンスを初期化し、共有する。
- * @returns CycleTLS クライアント。
+ * Lazily initialize the CycleTLS client and share it across calls.
  */
 async function initCycleTLSWithProxy(): Promise<CycleTLSClient> {
   cycleTLSInstancePromise ??= initCycleTLS()
@@ -65,10 +58,7 @@ async function initCycleTLSWithProxy(): Promise<CycleTLSClient> {
 }
 
 /**
- * CycleTLS を使った fetch 実装（プロキシ対応）。
- * @param input fetch の入力。
- * @param init fetch の初期化オプション。
- * @returns Fetch レスポンス。
+ * `fetch`-compatible implementation backed by CycleTLS (TLS fingerprinting), with proxy support.
  */
 export async function cycleTLSFetchWithProxy(
   input: RequestInfo | URL,
@@ -197,8 +187,7 @@ export async function cycleTLSFetchWithProxy(
 }
 
 /**
- * CycleTLS インスタンスを終了する。
- * @returns なし。
+ * Shut down the CycleTLS client and twitter-scraper's CycleTLS instance.
  */
 export async function cleanupCycleTLS(): Promise<void> {
   if (cycleTLSInstancePromise) {

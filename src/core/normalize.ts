@@ -1,9 +1,8 @@
 import { type UserSnapshot } from './types.js'
 
 /**
- * API レスポンスから UserSnapshot に正規化する。
- * @param data API レスポンス。
- * @returns 正規化済みユーザー。取得できない場合は null。
+ * Normalize an API response item to a `UserSnapshot`.
+ * Returns null if the user ID or screen name cannot be resolved.
  */
 export function normalizeUserSnapshot(data: unknown): UserSnapshot | null {
   if (!data || typeof data !== 'object') {
@@ -30,7 +29,7 @@ export function normalizeUserSnapshot(data: unknown): UserSnapshot | null {
         protected?: boolean
       }
     | undefined
-  // v0.0.56 以降、 screen_name / name は legacy から core に移動した
+  // Since twitter-openapi v0.0.56, screen_name / name moved from legacy to core
   const core = user.core as { screenName?: string; name?: string } | undefined
 
   const screenName =
@@ -54,9 +53,7 @@ export function normalizeUserSnapshot(data: unknown): UserSnapshot | null {
 }
 
 /**
- * ユーザー一覧を安定した順序でソートする。
- * @param users ユーザー一覧。
- * @returns ソート済みユーザー一覧。
+ * Sort users by screen name, then ID, for a stable order. Does not mutate the input.
  */
 export function sortUsers(users: UserSnapshot[]): UserSnapshot[] {
   return users.toSorted((a, b) => {

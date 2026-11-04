@@ -12,17 +12,12 @@ import {
 const logger = Logger.configure('auth')
 
 /**
- * GlitchTip へ転送されるログメッセージの最大文字数。
- * サードパーティ API のエラーには HTTP レスポンスヘッダーやボディ全体が
- * message に埋め込まれることがあるため、外部送信時の情報量を抑える。
+ * Maximum length of an error message forwarded to GlitchTip.
+ * Third-party API errors can embed whole HTTP response headers or bodies in
+ * `message`, so cap the amount of data sent externally.
  */
 const MAX_ERROR_MESSAGE_LENGTH = 2000
 
-/**
- * エラーメッセージが長すぎる場合に切り詰める。
- * @param message - 元のメッセージ。
- * @returns 切り詰め後のメッセージ。
- */
 function truncateMessage(message: string): string {
   return message.length <= MAX_ERROR_MESSAGE_LENGTH
     ? message
@@ -30,11 +25,9 @@ function truncateMessage(message: string): string {
 }
 
 /**
- * unknown な例外情報を Error に変換する。
- * Error 以外の値は JSON.stringify で構造化情報を保持しつつ、
- * シリアライズできない場合のみ String() にフォールバックする。
- * @param error - 例外情報。
- * @returns Error インスタンス。
+ * Convert an unknown thrown value to an `Error`.
+ * Non-Error values keep their structure via `JSON.stringify`, falling back to
+ * `String()` only when they cannot be serialized.
  */
 function toError(error: unknown): Error {
   if (error instanceof Error) {
@@ -50,22 +43,15 @@ function toError(error: unknown): Error {
 }
 
 /**
- * ディスクに保存する認証 Cookie キャッシュ。
+ * Auth cookie cache persisted to disk.
  */
 interface CachedCookies {
-  /** auth_token の値。 */
   auth_token: string
-  /** ct0 の値。 */
   ct0: string
-  /** 保存時刻（ミリ秒の epoch）。 */
+  /** Save time (epoch milliseconds). */
   savedAt: number
 }
 
-/**
- * Cookie キャッシュの構造が妥当か判定する。
- * @param data 判定対象。
- * @returns 妥当なら true。
- */
 function isValidCachedCookies(data: unknown): data is CachedCookies {
   if (typeof data !== 'object' || data === null) {
     return false
@@ -79,8 +65,7 @@ function isValidCachedCookies(data: unknown): data is CachedCookies {
 }
 
 /**
- * Cookie キャッシュを読み込む（期限切れは無効）。
- * @returns 有効なキャッシュ、なければ null。
+ * Load the cookie cache. Returns null if missing, invalid, or older than `COOKIE_EXPIRY_DAYS`.
  */
 function loadCachedCookies(): CachedCookies | null {
   try {
@@ -100,11 +85,6 @@ function loadCachedCookies(): CachedCookies | null {
   }
 }
 
-/**
- * Cookie キャッシュを保存する。
- * @param authToken auth_token の値。
- * @param ct0 ct0 の値。
- */
 function saveCookies(authToken: string, ct0: string): void {
   const dir = path.dirname(COOKIE_CACHE_FILE)
   if (dir && dir !== '.' && !fs.existsSync(dir)) {
@@ -119,14 +99,8 @@ function saveCookies(authToken: string, ct0: string): void {
 }
 
 /**
- * 503 対応のログインリトライ。
- * @param scraper Scraper インスタンス。
- * @param username ユーザー名。
- * @param password パスワード。
- * @param email メールアドレス（任意）。
- * @param twoFactorSecret 2FA シークレット（任意）。
- * @param maxRetries 最大リトライ回数。
- * @returns なし。
+ * Log in, retrying with exponential backoff only on 503 / Service Unavailable.
+ * Other errors are thrown immediately.
  */
 async function loginWithRetry(
   scraper: Scraper,
@@ -159,9 +133,8 @@ async function loginWithRetry(
 }
 
 /**
- * 認証 Cookie を取得する（キャッシュ利用あり）。
- * @param credentials 認証情報。
- * @returns auth_token と ct0。
+ * Get auth cookies, using the cookie cache when valid and logging in otherwise.
+ * @returns `auth_token` and `ct0`.
  */
 export async function getAuthCookies(
   credentials: Credentials

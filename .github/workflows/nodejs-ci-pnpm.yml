@@ -1,4 +1,4 @@
-# Node.js でビルド・テストを実行する。バージョンは .node-version に記載されているものを利用する
+# Build and test with Node.js, using the version in .node-version
 
 name: Node CI
 

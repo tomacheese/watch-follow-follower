@@ -2,9 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 /**
- * JSON ファイルを読み込む。
- * @param filePath ファイルパス。
- * @returns 読み込み結果。失敗時は null。
+ * Read a JSON file. Returns null if the file is missing or not valid JSON.
  */
 export function readJsonFile(filePath: string): unknown {
   if (!fs.existsSync(filePath)) {
@@ -19,9 +17,7 @@ export function readJsonFile(filePath: string): unknown {
 }
 
 /**
- * JSON ファイルを書き込む。
- * @param filePath ファイルパス。
- * @param data 書き込みデータ。
+ * Write a JSON file, creating parent directories as needed.
  */
 export function writeJsonFile(filePath: string, data: unknown): void {
   const dir = path.dirname(filePath)

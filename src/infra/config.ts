@@ -7,66 +7,53 @@ export const COOKIE_CACHE_FILE =
 export const COOKIE_EXPIRY_DAYS = 7
 
 /**
- * JSON から読み込むアプリ設定。
+ * Validated app config loaded from the config file.
  */
 export interface AppConfig {
   twitter: {
-    /** ログイン用ユーザー名（スクリーンネーム）。 */
     username: string
-    /** ログイン用パスワード。 */
     password: string
-    /** ログイン用メールアドレス（任意）。 */
     emailAddress?: string
   }
   discord?: {
-    /** Discord Webhook URL。 */
     webhookUrl?: string
   }
 }
 
 /**
- * JSON から読み込む設定の生データ。
+ * Raw, unvalidated config file contents.
  */
 export interface AppConfigSource {
   twitter?: {
-    /** ログイン用ユーザー名（スクリーンネーム）。 */
     username?: string
-    /** ログイン用パスワード。 */
     password?: string
-    /** ログイン用メールアドレス（任意）。 */
     emailAddress?: string
   }
   discord?: {
-    /** Discord Webhook URL。 */
     webhookUrl?: string
   }
 }
 
 /**
- * 環境変数や設定ファイルから解決した認証情報。
+ * Credentials resolved from environment variables or the config file.
  */
 export interface Credentials {
-  /** ログイン用ユーザー名（スクリーンネーム）。 */
   username: string
-  /** ログイン用パスワード。 */
   password: string
-  /** ログイン用メールアドレス（任意）。 */
   emailAddress?: string
-  /** 2FA シークレット（TOTP、任意）。 */
+  /** TOTP secret for 2FA. */
   twoFactorSecret?: string
 }
 
 /**
- * Discord 通知設定。
+ * Discord notification settings.
  */
 export interface DiscordConfig {
-  /** 通知投稿先の Webhook URL。 */
   webhookUrl?: string
 }
 
 /**
- * 設定ファイルを読み込む。
- * @returns 設定内容（未検証の生データ）。
+ * Read the config file without validating its fields. Throws if the file is missing or not an object.
  */
 export function loadConfigSource(): AppConfigSource {
   if (!fs.existsSync(CONFIG_PATH)) {
@@ -81,8 +68,7 @@ export function loadConfigSource(): AppConfigSource {
 }
 
 /**
- * 設定ファイルを読み込む。
- * @returns 設定内容。
+ * Read the config file and require `twitter.username` and `twitter.password`.
  */
 export function loadConfig(): AppConfig {
   const config = loadConfigSource()
@@ -96,8 +82,7 @@ export function loadConfig(): AppConfig {
 }
 
 /**
- * 認証情報を環境変数/設定ファイルから解決する。
- * @returns 認証情報。
+ * Resolve credentials. Environment variables take precedence over the config file.
  */
 export function getCredentials(): Credentials {
   const envUsername = process.env.TWITTER_USERNAME
@@ -127,8 +112,7 @@ export function getCredentials(): Credentials {
 }
 
 /**
- * Discord 設定を取得する。
- * @returns Discord 設定。なければ null。
+ * Get the Discord settings from the config file, or null if absent.
  */
 export function getDiscordConfig(): DiscordConfig | null {
   if (!fs.existsSync(CONFIG_PATH)) {
@@ -139,9 +123,7 @@ export function getDiscordConfig(): DiscordConfig | null {
 }
 
 /**
- * 取得対象のユーザー名を決定する。
- * @param defaultUsername 既定のユーザー名。
- * @returns 対象ユーザー名。
+ * Resolve the target username; `TWITTER_TARGET_USERNAME` takes precedence over `TARGET_USERNAME`.
  */
 export function getTargetUsername(defaultUsername: string): string {
   return (

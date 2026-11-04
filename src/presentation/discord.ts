@@ -1,15 +1,13 @@
 import { type UserSnapshot } from '../core/types.js'
 
 /**
- * 追加 / 削除それぞれのユーザー一覧テキストの最大文字数。
- * 両方を 1 フィールド (上限 1024 文字) に入れるため、ラベル分の余白を残して 480 とする。
+ * Maximum text length of each of the added / removed user lists.
+ * Both go into one field (limit 1024 characters), so 480 leaves room for labels.
  */
 const MAX_USERS_TEXT_LENGTH = 480
 
 /**
- * Discord 用の Embed を組み立てる。
- * @param params パラメータ。
- * @returns Embed オブジェクト。
+ * Build a Discord embed. User-facing strings are intentionally Japanese.
  */
 function buildDiscordEmbed(params: {
   title: string
@@ -21,8 +19,8 @@ function buildDiscordEmbed(params: {
   const removedCount = params.diff.removed.length
   const total = addedCount + removedCount
 
-  // Discord の Embed フィールド値は 1024 文字までで、超過すると 400 になり
-  // スナップショットが更新されず通知が永続的に失敗するため、各セクションを上限内に収める
+  // A Discord embed field value is limited to 1024 characters; exceeding it returns 400,
+  // the snapshot is never updated, and notification fails permanently. Keep each section within the limit.
   const formatUsers = (users: UserSnapshot[]): string => {
     if (users.length === 0) {
       return 'なし'
@@ -69,11 +67,7 @@ function buildDiscordEmbed(params: {
 }
 
 /**
- * Discord Webhook に通知する。
- * 非 2xx 応答やネットワーク失敗の場合は例外を throw する。
- * @param webhookUrl Webhook URL。
- * @param payload 通知内容。
- * @returns なし。
+ * Notify a Discord webhook. Throws on a non-2xx response or network failure.
  */
 export async function sendDiscordNotification(
   webhookUrl: string,

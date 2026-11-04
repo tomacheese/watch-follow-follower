@@ -21,16 +21,14 @@ import { sendDiscordNotification } from './presentation/discord.js'
 const logger = Logger.configure('main')
 
 /**
- * GlitchTip へ転送されるログメッセージの最大文字数。
- * サードパーティ API のエラーには HTTP レスポンスヘッダーやボディ全体が
- * message に埋め込まれることがあるため、外部送信時の情報量を抑える。
+ * Maximum length of an error message forwarded to GlitchTip.
+ * Third-party API errors can embed whole HTTP response headers or bodies in
+ * `message`, so cap the amount of data sent externally.
  */
 const MAX_ERROR_MESSAGE_LENGTH = 2000
 
 /**
- * エラーメッセージが長すぎる場合に切り詰める。
- * @param message - 元のメッセージ。
- * @returns 切り詰め後のメッセージ。
+ * Truncate an error message that exceeds `MAX_ERROR_MESSAGE_LENGTH`.
  */
 function truncateMessage(message: string): string {
   return message.length <= MAX_ERROR_MESSAGE_LENGTH
@@ -39,11 +37,9 @@ function truncateMessage(message: string): string {
 }
 
 /**
- * unknown な例外情報を Error に変換する。
- * Error 以外の値は JSON.stringify で構造化情報を保持しつつ、
- * シリアライズできない場合のみ String() にフォールバックする。
- * @param error - 例外情報。
- * @returns Error インスタンス。
+ * Convert an unknown thrown value to an `Error`.
+ * Non-Error values keep their structure via `JSON.stringify`, falling back to
+ * `String()` only when they cannot be serialized.
  */
 function toError(error: unknown): Error {
   if (error instanceof Error) {
@@ -59,10 +55,10 @@ function toError(error: unknown): Error {
 }
 
 /**
- * X 側の一時的なログインフロー障害（366: flow not accessible / 131: internal error）か判定する。
- * twitter-scraper の AuthenticationError は "Authentication error (<code>): ..." 形式のメッセージを持つ。
- * @param error - 例外情報。
- * @returns 一時的な認証エラーなら true。
+ * Whether the error is a transient X login-flow failure
+ * (366: flow not accessible / 131: internal error).
+ * twitter-scraper's AuthenticationError has a message of the form
+ * "Authentication error (<code>): ...".
  */
 function isTransientAuthError(error: unknown): boolean {
   return (
@@ -72,8 +68,7 @@ function isTransientAuthError(error: unknown): boolean {
 }
 
 /**
- * メイン処理。
- * @returns なし。
+ * Fetch followers/following, write snapshots and a diff, and notify Discord.
  */
 async function main(): Promise<void> {
   let exitCode = 0
@@ -206,7 +201,8 @@ async function main(): Promise<void> {
       logger.info('No previous data to diff.')
     }
 
-    // 通知に失敗した場合は差分を次回実行で再検出できるよう、通知完了後にスナップショットを更新する
+    // Update snapshots only after notification succeeds,
+    // so a failed notification is re-detected as a diff on the next run.
     writeJsonFile(followersPath, followersSnapshot)
     writeJsonFile(followingPath, followingSnapshot)
 
@@ -215,7 +211,7 @@ async function main(): Promise<void> {
     )
   } catch (error) {
     if (isTransientAuthError(error)) {
-      // 一時的な障害で次回の定期実行で再試行されるため、GlitchTip に送られる warn 以上は使わない
+      // Retried on the next scheduled run, so avoid warn or above, which is forwarded to GlitchTip
       logger.info(
         `Transient X login error, will retry on next run: ${toError(error).message}`
       )
@@ -232,8 +228,8 @@ async function main(): Promise<void> {
 }
 
 main().catch((error: unknown) => {
-  // main() の finally 内で Logger.closeAll() 済みのためキャッシュがクリアされており、
-  // モジュールスコープの logger をそのまま使うとログが失われる可能性がある。再取得する。
+  // Logger.closeAll() already ran in main()'s finally and cleared the cache,
+  // so the module-scope logger may lose output. Re-acquire it.
   const finalLogger = Logger.configure('main')
   finalLogger.error('Fatal error occurred', toError(error))
   Logger.closeAll()
