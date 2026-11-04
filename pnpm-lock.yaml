@@ -167,8 +167,8 @@ importers:
   .:
     dependencies:
       '@book000/node-utils':
-        specifier: 1.25.194
-        version: 1.25.194
+        specifier: 1.26.0
+        version: 1.26.0
       '@the-convocation/twitter-scraper':
         specifier: 0.22.3
         version: 0.22.3(cycletls@2.0.5)(supports-color@8.1.1)
@@ -182,8 +182,8 @@ importers:
         specifier: 4.23.15
         version: 4.23.15
       twitter-openapi-typescript:
-        specifier: 0.1.4
-        version: 0.1.4
+        specifier: 0.1.5
+        version: 0.1.5
     devDependencies:
       '@book000/eslint-config':
         specifier: 1.16.113
@@ -217,8 +217,8 @@ packages:
     peerDependencies:
       eslint: 10.14.0
 
-  '@book000/node-utils@1.25.194':
-    resolution: {integrity: sha512-s8wCv7APGGaRMjQzq/RyjZWeY3qEbBd4P7nZbloRV5F4LEvyZMVSj21pURxYp1xifuaLyJOrvq0zhTws6Zxtvw==}
+  '@book000/node-utils@1.26.0':
+    resolution: {integrity: sha512-OHPFi9FrDpJnfwFNzYzOLLsjeyA4pS4+RVkE5CuBTUjInztNR4gBqJV2i2QMVXIpnkqObs4b2UbuN08oStDVeA==}
 
   '@cacheable/memory@2.2.0':
     resolution: {integrity: sha512-CTLKqLItRCEixEAewD3/j9DB3/o96gpTPD4eJ1v+DGOlxZRZncRQkGYqqnAGCscYd6RNeXfGeiuCphsPtqyIfQ==}
@@ -1758,8 +1758,8 @@ packages:
   twitter-openapi-typescript-generated@0.1.4:
     resolution: {integrity: sha512-9AESaCfQhhcA1VAjVANLvWPODzAmjGwwHx0vQv8WZYFbJCHcj/V6Kw2xT0iznUfDSq40Egc481lQ4GUCcVNqUg==}
 
-  twitter-openapi-typescript@0.1.4:
-    resolution: {integrity: sha512-GYveHGtkzXkUQN/lKuOH8KFQDKQz6Mq80381HhDFLcCqkC2rCH7ThFcaLEYsZcJV82e1Ga4i5VnzyT+xud+RIQ==}
+  twitter-openapi-typescript@0.1.5:
+    resolution: {integrity: sha512-wuvXU56LsrWoABjwQU/Nowk7K5ElSbr0KFhu4aL5T5NMP9n+0i2PE7H/srYeGbdlKrug5tMDOcJE5u93QA1sBg==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -1891,7 +1891,7 @@ snapshots:
       - ts-declaration-location
       - typescript
 
-  '@book000/node-utils@1.25.194':
+  '@book000/node-utils@1.26.0':
     dependencies:
       '@sentry/node': 11.10.0
       cycle: 1.0.3
@@ -3435,7 +3435,7 @@ snapshots:
 
   twitter-openapi-typescript-generated@0.1.4: {}
 
-  twitter-openapi-typescript@0.1.4:
+  twitter-openapi-typescript@0.1.5:
     dependencies:
       twitter-openapi-typescript-generated: 0.1.4
       x-client-transaction-id-generater: 0.0.7

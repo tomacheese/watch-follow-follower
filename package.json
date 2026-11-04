@@ -8,12 +8,12 @@
     "url": "https://github.com/tomacheese/watch-follow-follower/issues"
   },
   "dependencies": {
-    "@book000/node-utils": "1.25.194",
+    "@book000/node-utils": "1.26.0",
     "@the-convocation/twitter-scraper": "0.22.3",
     "cycletls": "2.0.5",
     "headers-polyfill": "5.0.1",
     "tsx": "4.23.15",
-    "twitter-openapi-typescript": "0.1.4"
+    "twitter-openapi-typescript": "0.1.5"
   },
   "devDependencies": {
     "@book000/eslint-config": "1.16.113",
