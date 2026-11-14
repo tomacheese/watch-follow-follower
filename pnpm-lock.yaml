@@ -182,8 +182,8 @@ importers:
         specifier: 4.23.15
         version: 4.23.15
       twitter-openapi-typescript:
-        specifier: 0.1.7
-        version: 0.1.7
+        specifier: 0.1.8
+        version: 0.1.8
     devDependencies:
       '@book000/eslint-config':
         specifier: 1.16.122
@@ -1771,11 +1771,11 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  twitter-openapi-typescript-generated@0.1.6:
-    resolution: {integrity: sha512-WePbM0HrvnR7RrE3Dbo0AD1tbEmYXLFmjbIpp/En6fXO+2QHP2rUfv2xmrV+kMvcF9NFG111j9yTm8boMiz0UQ==}
+  twitter-openapi-typescript-generated@0.1.8:
+    resolution: {integrity: sha512-XI+vfHHDke9LqeOIwjsZynt2nDCShmy5N5ZTl3i+2lATIPj5LsMQwvSGNn9a60CcadYg8XLAC8F7Su1XTCN0/w==}
 
-  twitter-openapi-typescript@0.1.7:
-    resolution: {integrity: sha512-inf3GDLcp73jNUGv6ieMZTSZNscgNgKe05TcZZYLw5JblF/v/2bykcOzjswhtjKf/Bke+tEOUjR9cqH09OWMkQ==}
+  twitter-openapi-typescript@0.1.8:
+    resolution: {integrity: sha512-TsmUWzW8sptb4UBdC3UMktiYjVHmLfyUTfshM9Gn4wljdMYQAcLRpUslQF5h2XJrLPpMON+xN0O11249U6qzsw==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -3461,11 +3461,11 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  twitter-openapi-typescript-generated@0.1.6: {}
+  twitter-openapi-typescript-generated@0.1.8: {}
 
-  twitter-openapi-typescript@0.1.7:
+  twitter-openapi-typescript@0.1.8:
     dependencies:
-      twitter-openapi-typescript-generated: 0.1.6
+      twitter-openapi-typescript-generated: 0.1.8
       x-client-transaction-id-generater: 0.0.7
 
   type-check@0.4.0:
