@@ -46,6 +46,7 @@ function toError(error: unknown): Error {
  * Auth cookie cache persisted to disk.
  */
 interface CachedCookies {
+  username: string
   auth_token: string
   ct0: string
   /** Save time (epoch milliseconds). */
@@ -58,6 +59,7 @@ function isValidCachedCookies(data: unknown): data is CachedCookies {
   }
   const obj = data as Record<string, unknown>
   return (
+    typeof obj.username === 'string' &&
     typeof obj.auth_token === 'string' &&
     typeof obj.ct0 === 'string' &&
     typeof obj.savedAt === 'number'
@@ -85,12 +87,13 @@ function loadCachedCookies(): CachedCookies | null {
   }
 }
 
-function saveCookies(authToken: string, ct0: string): void {
+function saveCookies(username: string, authToken: string, ct0: string): void {
   const dir = path.dirname(COOKIE_CACHE_FILE)
   if (dir && dir !== '.' && !fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true })
   }
   const data: CachedCookies = {
+    username,
     auth_token: authToken,
     ct0,
     savedAt: Date.now(),
@@ -138,11 +141,11 @@ async function loginWithRetry(
  */
 export async function getAuthCookies(
   credentials: Credentials
-): Promise<{ authToken: string; ct0: string }> {
+): Promise<{ authToken: string; ct0: string; cached: boolean }> {
   const cached = loadCachedCookies()
-  if (cached) {
+  if (cached?.username === credentials.username) {
     logger.info('Using cached cookies')
-    return { authToken: cached.auth_token, ct0: cached.ct0 }
+    return { authToken: cached.auth_token, ct0: cached.ct0, cached: true }
   }
 
   logger.info('Logging in with twitter-scraper + CycleTLS...')
@@ -170,8 +173,12 @@ export async function getAuthCookies(
     throw new Error('Failed to get auth_token or ct0 from cookies')
   }
 
-  saveCookies(authToken, ct0)
+  saveCookies(credentials.username, authToken, ct0)
   logger.info('Login successful, cookies saved')
 
-  return { authToken, ct0 }
+  return { authToken, ct0, cached: false }
+}
+
+export function invalidateCachedCookies(): void {
+  fs.rmSync(COOKIE_CACHE_FILE, { force: true })
 }

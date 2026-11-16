@@ -1,3 +1,10 @@
+export function isAuthenticationError(error: unknown): boolean {
+  return (
+    (error as { response?: { status?: number } } | null)?.response?.status ===
+    401
+  )
+}
+
 import { Logger } from '@book000/node-utils'
 
 const logger = Logger.configure('retry')
@@ -57,7 +64,7 @@ export async function withRetry<T>(
     try {
       return await fn()
     } catch (error: unknown) {
-      if (attempt >= maxRetries) {
+      if (isAuthenticationError(error) || attempt >= maxRetries) {
         throw error
       }
       const rateLimitDelay = getRateLimitDelayMs(error)
