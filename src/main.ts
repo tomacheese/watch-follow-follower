@@ -14,8 +14,8 @@ import {
   getTargetUsername,
 } from './infra/config.js'
 import { readJsonFile, writeJsonFile } from './infra/fs.js'
-import { getAuthCookies } from './infra/auth.js'
-import { withRetry } from './core/retry.js'
+import { getAuthCookies, invalidateCachedCookies } from './infra/auth.js'
+import { isAuthenticationError, withRetry } from './core/retry.js'
 import { sendDiscordNotification } from './presentation/discord.js'
 
 const logger = Logger.configure('main')
@@ -79,51 +79,71 @@ async function main(): Promise<void> {
 
     logger.info('Target user resolved.')
 
-    const { authToken, ct0 } = await getAuthCookies(credentials)
     TwitterOpenApi.fetchApi = createGuardedFetch(cycleTLSFetchWithProxy)
+    const fetchSnapshots = async (authToken: string, ct0: string) => {
+      const api = new TwitterOpenApi()
+      const client = await api.getClientFromCookies({
+        auth_token: authToken,
+        ct0,
+      })
 
-    const api = new TwitterOpenApi()
-    const client = await api.getClientFromCookies({
-      auth_token: authToken,
-      ct0,
-    })
+      const targetResponse = await withRetry(
+        () =>
+          client.getUserApi().getUserByScreenName({
+            screenName: targetUsername,
+          }),
+        {
+          maxRetries: 3,
+          baseDelayMs: 2000,
+          operationName: 'Resolve user',
+        }
+      )
 
-    const targetResponse = await withRetry(
-      () =>
-        client.getUserApi().getUserByScreenName({
-          screenName: targetUsername,
-        }),
-      {
-        maxRetries: 3,
-        baseDelayMs: 2000,
-        operationName: 'Resolve user',
+      const targetUser =
+        normalizeUserSnapshot(targetResponse.data) ??
+        normalizeUserSnapshot({ user: targetResponse.data.user })
+      if (!targetUser) {
+        throw new Error(`Failed to resolve user: ${targetUsername}`)
       }
-    )
 
-    const targetUser =
-      normalizeUserSnapshot(targetResponse.data) ??
-      normalizeUserSnapshot({ user: targetResponse.data.user })
-    if (!targetUser) {
-      throw new Error(`Failed to resolve user: ${targetUsername}`)
+      const targetUserId = targetUser.id
+
+      const followers = await fetchAllUsers('Followers', (cursor) =>
+        client.getUserListApi().getFollowers({
+          userId: targetUserId,
+          cursor,
+          count: 200,
+        })
+      )
+
+      const following = await fetchAllUsers('Following', (cursor) =>
+        client.getUserListApi().getFollowing({
+          userId: targetUserId,
+          cursor,
+          count: 200,
+        })
+      )
+
+      return { targetUserId, followers, following }
     }
 
-    const targetUserId = targetUser.id
-
-    const followers = await fetchAllUsers('Followers', (cursor) =>
-      client.getUserListApi().getFollowers({
-        userId: targetUserId,
-        cursor,
-        count: 200,
-      })
-    )
-
-    const following = await fetchAllUsers('Following', (cursor) =>
-      client.getUserListApi().getFollowing({
-        userId: targetUserId,
-        cursor,
-        count: 200,
-      })
-    )
+    let cookies = await getAuthCookies(credentials)
+    let snapshots: Awaited<ReturnType<typeof fetchSnapshots>>
+    try {
+      snapshots = await fetchSnapshots(cookies.authToken, cookies.ct0)
+    } catch (error) {
+      if (!isAuthenticationError(error)) throw error
+      invalidateCachedCookies()
+      if (!cookies.cached) throw error
+      cookies = await getAuthCookies(credentials)
+      try {
+        snapshots = await fetchSnapshots(cookies.authToken, cookies.ct0)
+      } catch (refreshError) {
+        if (isAuthenticationError(refreshError)) invalidateCachedCookies()
+        throw refreshError
+      }
+    }
+    const { targetUserId, followers, following } = snapshots
 
     const targetDir = path.join(
       OUTPUT_DIR,
