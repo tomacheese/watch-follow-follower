@@ -67,6 +67,22 @@ export function loadConfigSource(): AppConfigSource {
   return parsed
 }
 
+function validateCredentials(
+  username: unknown,
+  password: unknown,
+  emailAddress: unknown
+): void {
+  if (typeof username !== 'string' || !username) {
+    throw new Error('Config is missing twitter.username or twitter.password')
+  }
+  if (typeof password !== 'string' || !password) {
+    throw new Error('Config is missing twitter.username or twitter.password')
+  }
+  if (emailAddress !== undefined && typeof emailAddress !== 'string') {
+    throw new Error('Invalid config format')
+  }
+}
+
 /**
  * Read the config file and require `twitter.username` and `twitter.password`.
  */
@@ -75,9 +91,11 @@ export function loadConfig(): AppConfig {
   if (!config.twitter || typeof config.twitter !== 'object') {
     throw new Error('Config is missing twitter section')
   }
-  if (!config.twitter.username || !config.twitter.password) {
-    throw new Error('Config is missing twitter.username or twitter.password')
-  }
+  validateCredentials(
+    config.twitter.username,
+    config.twitter.password,
+    config.twitter.emailAddress
+  )
   return config as AppConfig
 }
 
@@ -90,18 +108,23 @@ export function getCredentials(): Credentials {
   const envEmail = process.env.TWITTER_EMAIL_ADDRESS
   const envTwoFactor = process.env.TWITTER_AUTH_CODE_SECRET
 
-  const config: AppConfig | null =
-    !envUsername || !envPassword || (!envEmail && fs.existsSync(CONFIG_PATH))
-      ? loadConfig()
-      : null
+  const config = fs.existsSync(CONFIG_PATH) ? loadConfigSource() : null
 
-  const username = envUsername ?? config?.twitter.username
-  const password = envPassword ?? config?.twitter.password
+  const username = envUsername ?? config?.twitter?.username
+  const password = envPassword ?? config?.twitter?.password
 
-  if (!username || !password) {
+  if (
+    typeof username !== 'string' ||
+    !username ||
+    typeof password !== 'string' ||
+    !password
+  ) {
     throw new Error('TWITTER_USERNAME or TWITTER_PASSWORD is not set')
   }
-  const emailAddress = envEmail ?? config?.twitter.emailAddress
+  const emailAddress = envEmail ?? config?.twitter?.emailAddress
+  if (emailAddress !== undefined && typeof emailAddress !== 'string') {
+    throw new Error('Invalid config format')
+  }
 
   return {
     username,
